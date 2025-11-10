@@ -41,18 +41,11 @@
                     { data: 'action' }
                 ],
                 actionRenderer: function(data, type, full, meta) {
-                    let btn = '';
-                    if(full.name != 'Admin') {
-                        btn += `
-                            <li><a href="{{ url('roles') }}/${full.id}/edit" class="dropdown-item">Edit</a></li>
-                        `;
-                    }
-
-                    if(full.name != 'Admin') {
-                        btn += `
-                            <li><a href="javascript:;" class="dropdown-item text-danger deleteRecord" data-url="{{ url('roles') }}/${full.id}">Delete</a></li>
-                        `;
-                    }
+                    let btn = `
+                        <li><a href="{{ route('roles.edit', ':id') }}".replace(':id', full.id) class="dropdown-item">Edit</a></li>
+                        <li><a href="javascript:;" class="dropdown-item text-danger deleteRecord" data-url="{{ route('roles.destroy', ':id') }}".replace(':id', full.id)>Delete</a></li>
+                    `;
+                    
                     return `
                         <div class="d-inline-block">
                             <a href="javascript:;" class="btn btn-icon btn-text-secondary rounded-pill waves-effect dropdown-toggle hide-arrow" data-bs-toggle="dropdown">

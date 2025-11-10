@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu">
     <div class="app-brand demo">
-        <a href="{{ route('admin.index') }}" class="app-brand-link">
+        <a href="{{ route('dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <span class="text-primary">
                     <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -20,19 +20,19 @@
     </div>
     <div class="menu-inner-shadow"></div>
     <ul class="menu-inner py-1">
-        <li class="menu-item {{ \Route::getFacadeRoot()->current()->uri() == '/' ? 'active' : '' }}">
-            <a href="{{ route('admin.index') }}" class="menu-link">
+        <li class="menu-item {{ \Route::getFacadeRoot()->current()->uri() == '/dashboard' ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="menu-link">
                 <i class="menu-icon icon-base ti tabler-home"></i>
                 <div data-i18n="Dashboard">Dashboard</div>
             </a>
         </li>
-        <li class="menu-item active open">
+        <li class="menu-item {{ request()->segment(1) == 'roles' || request()->segment(1) == 'users' ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon icon-base ti tabler-users"></i>
                 <div data-i18n="User Management">User Management</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item active">
+                <li class="menu-item {{ request()->segment(1) == 'roles' ? 'active' : '' }}">
                     <a href="{{ route('roles.index') }}" class="menu-link">
                         <div data-i18n="Roles">Roles</div>
                     </a>
