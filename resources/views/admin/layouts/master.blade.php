@@ -37,6 +37,7 @@
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('assets/vendor/js/template-customizer.js') }}"></script>
     <script src="{{ asset('assets/js/config.js') }}"></script>
+    @yield('page-css')
 </head>
 <body>
     <div class="layout-wrapper layout-content-navbar">
@@ -105,5 +106,4 @@
     </script>
     @yield('page-js')
 </body>
-
 </html>

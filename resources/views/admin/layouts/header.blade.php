@@ -30,7 +30,7 @@
                 <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
                     data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt class="rounded-circle" />
+                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}" alt class="rounded-circle" />
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -39,11 +39,11 @@
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-2">
                                     <div class="avatar avatar-online">
-                                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}" alt class="rounded-circle" />
+                                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}" alt class="rounded-circle" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-0">{{ Auth::user()->name }}</h6>
+                                    <h6 class="mb-0">{{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}</h6>
                                     <small class="text-body-secondary">{{ Auth::user()->roles[0]->name }}</small>
                                 </div>
                             </div>
@@ -63,7 +63,7 @@
                     </li> --}}
                     <li>
                         <div class="d-grid px-2 pt-2 pb-1">
-                            <form method="POST" action="javascript:void(0);">
+                            <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-danger d-flex align-items-center justify-content-center w-100">
                                     <small class="align-middle">Logout</small>

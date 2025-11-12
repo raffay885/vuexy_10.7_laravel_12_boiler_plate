@@ -11,7 +11,7 @@
                     </svg>
                 </span>
             </span>
-            <span class="app-brand-text demo menu-text fw-bold ms-3">Vuexy</span>
+            <span class="app-brand-text demo menu-text fw-bold ms-3">eSyncro</span>
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
             <i class="icon-base ti menu-toggle-icon d-none d-xl-block"></i>
@@ -26,7 +26,20 @@
                 <div data-i18n="Dashboard">Dashboard</div>
             </a>
         </li>
-        <li class="menu-item {{ request()->segment(1) == 'roles' || request()->segment(1) == 'users' ? 'active open' : '' }}">
+        <li class="menu-item {{ request()->segment(1) == 'customers' || request()->segment(1) == 'customer-assets' ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon icon-base ti tabler-users"></i>
+                <div data-i18n="Customers">Customers</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->segment(1) == 'customers' ? 'active' : '' }}">
+                    <a href="{{ route('customers.index') }}" class="menu-link">
+                        <div data-i18n="Customers">Customers</div>
+                    </a>
+                </li>
+            </ul>
+        </li> 
+        {{-- <li class="menu-item {{ request()->segment(1) == 'roles' || request()->segment(1) == 'users' ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon icon-base ti tabler-users"></i>
                 <div data-i18n="User Management">User Management</div>
@@ -43,7 +56,7 @@
                     </a>
                 </li>
             </ul>
-        </li> 
+        </li>  --}}
     </ul>
 </aside>
 <div class="menu-mobile-toggler d-xl-none rounded-1">

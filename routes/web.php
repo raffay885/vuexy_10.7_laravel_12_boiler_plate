@@ -1,21 +1,29 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\CustomerAssetController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EstimateController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
+
+    // Customers
+    Route::resource('customers', CustomerController::class);
+    Route::get('customers/{id}/details', [CustomerController::class, 'details'])->name('customers.details');
+
+    // Customer Assets
+    Route::resource('customer-assets', CustomerAssetController::class);
+    Route::get('customer-assets/{assetId}/details', [CustomerAssetController::class, 'details'])->name('customer-assets.details');
+
+    // Estimates
+    Route::resource('estimates', EstimateController::class);
 
     // Role
     Route::resource('roles', RoleController::class);
-    
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';
