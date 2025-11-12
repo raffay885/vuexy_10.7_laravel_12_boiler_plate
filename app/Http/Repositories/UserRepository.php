@@ -37,7 +37,7 @@ class UserRepository implements UserRepositoryInterface{
 	public function create(array $data){
 		try{
 			$syncroCustomerId = null;
-			$syncroResponse = $this->getCustomersList(['email' => $data['email']]);
+			$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
 			if($syncroResponse){
 				if(isset($syncroResponse['customers']) && !empty($syncroResponse['customers'])){
 					$syncroCustomerId = $syncroResponse['customers'][0]['id'];
@@ -59,7 +59,7 @@ class UserRepository implements UserRepositoryInterface{
 		try{
 			$user = $this->findOne(['id' => $id]);
 			$syncroCustomerId = $user->syncro_customer_id;
-			$syncroResponse = $this->getCustomersList(['email' => $data['email']]);
+			$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
 
 			if($syncroResponse){
 				if(isset($syncroResponse['customers']) && !empty($syncroResponse['customers'])){

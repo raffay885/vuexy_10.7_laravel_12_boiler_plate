@@ -42,7 +42,7 @@ class CustomerAssetRepository implements CustomerAssetRepositoryInterface{
 	public function create(array $data){
 		try{
 			$customer = $this->userRepository->findOne(['id' => $data['customer_id']]);
-			$syncroResponse = $this->createCustomerAsset([
+			$syncroResponse = $this->syncroPost('customer_assets', [
 				...$data,
 				'properties' => (object)[],
 				'customer_id' => $customer->syncro_customer_id,
@@ -65,7 +65,7 @@ class CustomerAssetRepository implements CustomerAssetRepositoryInterface{
 	public function update(int $id, array $data){
 		try{
 			$customerAsset = $this->findOne(['id' => $id]);
-			$syncroResponse = $this->updateCustomerAsset($customerAsset->syncro_asset_id, [
+			$syncroResponse = $this->syncroPut('customer_assets/' . $customerAsset->syncro_asset_id, [
 				...$data,
 				'properties' => (object)[],
 				'customer_id' => $customerAsset->customer->syncro_customer_id,

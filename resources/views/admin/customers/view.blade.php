@@ -322,7 +322,7 @@
 					<h5 class="modal-title">Create Estimate</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
-				<form data-href="{{ route('estimates.store') }}" class="ajax-form in_page_ajax_form">
+				<form data-href="{{ route('estimates.store') }}" class="ajax-form in_page_ajax_form_page_reload">
 					@csrf
 					<div class="modal-body">
 						<div class="row">

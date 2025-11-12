@@ -118,7 +118,7 @@ class CustomerController extends Controller
         switch(request()->query('tab')) {
             case 'syncroDetails':
                 $customerDetails = [];
-                $customerSyncroDetails = $this->getCustomerDetails($customer->syncro_customer_id);
+                $customerSyncroDetails = $this->syncroGet('customers/' . $customer->syncro_customer_id);
                 if ($customerSyncroDetails) {
                     $customerDetails = $customerSyncroDetails['customer'];
                 }
@@ -126,7 +126,7 @@ class CustomerController extends Controller
                 break;
             case 'customerAssets':
                 $customerAssets = [];
-                $customerSyncroAssets = $this->getCustomerAssetsList(['customer_id' => $customer->syncro_customer_id]);
+                $customerSyncroAssets = $this->syncroGet('customer_assets', ['customer_id' => $customer->syncro_customer_id]);
                 if($customerSyncroAssets){
                     $customerAssets = $customerSyncroAssets['assets'];
                 }

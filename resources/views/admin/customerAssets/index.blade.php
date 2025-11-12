@@ -49,9 +49,11 @@
                                     <label class="form-label" for="asset_type_id">Asset Type<b class="text-danger">*</b></label>
                                     <select name="asset_type_id" id="asset_type_id" class="select2 form-select" data-placeholder="Select Asset Type" required>
                                         <option value="">Select Asset Type</option>
-                                        @foreach($assetTypes as $assetType)
-                                            <option value="{{ $assetType['id'] }}">{{ $assetType['name'] }}</option>
-                                        @endforeach
+                                        @if($assetTypes && isset($assetTypes['asset_types']))
+                                            @foreach($assetTypes['asset_types'] as $assetType)
+                                                <option value="{{ $assetType['id'] }}">{{ $assetType['name'] }}</option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                 </div>
                                 <div class="col-6">
@@ -99,9 +101,11 @@
                                     <label class="form-label" for="asset_type_id">Asset Type<b class="text-danger">*</b></label>
                                     <select name="asset_type_id" id="edit_asset_type_id" class="select2 form-select" data-placeholder="Select Asset Type" required>
                                         <option value="">Select Asset Type</option>
-                                        @foreach($assetTypes as $assetType)
-                                            <option value="{{ $assetType['id'] }}">{{ $assetType['name'] }}</option>
-                                        @endforeach
+                                        @if($assetTypes && isset($assetTypes['asset_types']))
+                                            @foreach($assetTypes['asset_types'] as $assetType)
+                                                <option value="{{ $assetType['id'] }}">{{ $assetType['name'] }}</option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                 </div>
                                 <div class="col-6">

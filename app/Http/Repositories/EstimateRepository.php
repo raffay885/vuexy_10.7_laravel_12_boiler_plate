@@ -29,7 +29,7 @@ class EstimateRepository implements EstimateRepositoryInterface{
 				];
 			}
 
-			$syncroResponse = $this->createEstimate([
+			$syncroResponse = $this->syncroPost('estimates', [
 				'number' => $data['number'],
 				'date' => $data['date'],
 				'customer_id' => $customer->syncro_customer_id,

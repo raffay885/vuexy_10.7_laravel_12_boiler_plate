@@ -32,7 +32,7 @@ class CustomerAssetController extends Controller
         }
 
         $customers = $this->userRepository->find(['user_type' => 'customer']);
-        $assetTypes = $this->getAssetTypes()['asset_types'];
+        $assetTypes = $this->syncroGet('asset_types');
         return view($this->view . 'index', get_defined_vars());
     }
 
@@ -123,7 +123,7 @@ class CustomerAssetController extends Controller
 
     public function details(string $assetId)
     {
-        $customerAsset = $this->getCustomerAssetDetails($assetId);
+        $customerAsset = $this->syncroGet('customer_assets/' . $assetId);
         if($customerAsset){
             return $customerAsset['asset'];
         }
