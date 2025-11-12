@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Interfaces\EstimateRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\Log;
 class EstimateController extends Controller
 {
     protected $estimateRepository;
@@ -49,6 +49,7 @@ class EstimateController extends Controller
             if ($e instanceof ValidationException) {
                 return response()->json(['status' => false, 'errors' => $e->errors()], 422);
             } else {
+                Log::error('Estimate Creation Error: ' . $e->getMessage());
                 return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
             }
         }

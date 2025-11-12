@@ -7,7 +7,7 @@ use App\Http\Interfaces\UserRepositoryInterface;
 use App\Traits\Syncro;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\Log;
 class CustomerController extends Controller
 {
     use Syncro;
@@ -55,6 +55,7 @@ class CustomerController extends Controller
             if ($e instanceof ValidationException) {
                 return response()->json(['status' => false, 'errors' => $e->errors()], 422);
             } else {
+                Log::error('Customer Creation Error: ' . $e->getMessage());
                 return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
             }
         }
@@ -94,6 +95,7 @@ class CustomerController extends Controller
             if ($e instanceof ValidationException) {
                 return response()->json(['status' => false, 'errors' => $e->errors()], 422);
             } else {
+                Log::error('Customer Update Error: ' . $e->getMessage());
                 return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
             }
         }
@@ -108,6 +110,7 @@ class CustomerController extends Controller
             $response = $this->userRepository->delete($id);
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
         } catch (\Exception $e) {
+            Log::error('Customer Delete Error: ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }

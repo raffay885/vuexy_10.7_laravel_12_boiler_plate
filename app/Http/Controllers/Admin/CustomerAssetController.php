@@ -8,7 +8,7 @@ use App\Http\Interfaces\UserRepositoryInterface;
 use App\Traits\Syncro;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\Log;
 class CustomerAssetController extends Controller
 {
     use Syncro;
@@ -63,6 +63,7 @@ class CustomerAssetController extends Controller
             if ($e instanceof ValidationException) {
                 return response()->json(['status' => false, 'errors' => $e->errors()], 422);
             } else {
+                Log::error('Customer Asset Creation Error: ' . $e->getMessage());
                 return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
             }
         }
@@ -103,6 +104,7 @@ class CustomerAssetController extends Controller
             if ($e instanceof ValidationException) {
                 return response()->json(['status' => false, 'errors' => $e->errors()], 422);
             } else {
+                Log::error('Customer Asset Update Error: ' . $e->getMessage());
                 return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
             }
         }
@@ -117,6 +119,7 @@ class CustomerAssetController extends Controller
             $response = $this->customerAssetRepository->delete($id);
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
         } catch (\Exception $e) {
+            Log::error('Customer Asset Delete Error: ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
