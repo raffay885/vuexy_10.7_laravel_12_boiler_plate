@@ -41,9 +41,12 @@
                     { data: 'action' }
                 ],
                 actionRenderer: function(data, type, full, meta) {
+                    let editUrl = "{{ route('roles.edit', ':id') }}".replace(':id', full.id);
+                    let deleteUrl = "{{ route('roles.destroy', ':id') }}".replace(':id', full.id);
+
                     let btn = `
-                        <li><a href="{{ route('roles.edit', ':id') }}".replace(':id', full.id) class="dropdown-item">Edit</a></li>
-                        <li><a href="javascript:;" class="dropdown-item text-danger deleteRecord" data-url="{{ route('roles.destroy', ':id') }}".replace(':id', full.id)>Delete</a></li>
+                        <li><a href="${editUrl}" class="dropdown-item">Edit</a></li>
+                        <li><a href="javascript:;" class="dropdown-item text-danger deleteRecord" data-href="${deleteUrl}">Delete</a></li>
                     `;
                     
                     return `

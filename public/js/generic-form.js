@@ -40,7 +40,9 @@ $(document).on('submit' , '.in_page_ajax_form_page_reload' , function (e){
     e.preventDefault();
     blockUI();
 
-    var url = $(this).attr('data-href');
+    const url = $(this).attr('data-href');
+    const redirectUrl = $(this).attr('data-redirect');
+
     $.ajax({
         url: url,
         type: 'POST',
@@ -54,7 +56,7 @@ $(document).on('submit' , '.in_page_ajax_form_page_reload' , function (e){
 			unblockUI();
             showToast('success', response?.message || 'Data saved successfully');
             setTimeout(function() {
-                location.reload();
+                location.href = redirectUrl;
             }, 1000);
 		}, error: function (xhr) {
 			unblockUI();

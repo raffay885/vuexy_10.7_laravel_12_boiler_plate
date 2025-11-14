@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Interfaces\CustomerAssetRepositoryInterface;
-use App\Http\Interfaces\UserRepositoryInterface;
+use App\Interfaces\CustomerAssetRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
 use App\Traits\Syncro;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use App\Http\Requests\CustomerAssetRequest;
 use Illuminate\Support\Facades\Log;
 class CustomerAssetController extends Controller
 {
@@ -47,25 +46,14 @@ class CustomerAssetController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CustomerAssetRequest $request)
     {
         try{
-            $validatedData = $request->validate([
-                'customer_id' => 'required|exists:users,id',
-                'name' => 'required|string|max:255',
-                'asset_type_id' => 'required|string|max:255',
-                'asset_serial' => 'required|string|max:255|unique:customer_assets,asset_serial',
-            ]);
-
-            $response = $this->customerAssetRepository->create($validatedData);
+            $response = $this->customerAssetRepository->create($request->validated());
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
-        } catch (\Exception | ValidationException $e) {
-            if ($e instanceof ValidationException) {
-                return response()->json(['status' => false, 'errors' => $e->errors()], 422);
-            } else {
-                Log::error('Customer Asset Creation Error: ' . $e->getMessage());
-                return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
-            }
+        } catch (\Exception $e) {
+            Log::error('Customer Asset Creation Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
 
@@ -88,25 +76,14 @@ class CustomerAssetController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CustomerAssetRequest $request, string $id)
     {
         try{
-            $validatedData = $request->validate([
-                'customer_id' => 'required|exists:users,id',
-                'name' => 'required|string|max:255',
-                'asset_type_id' => 'required|string|max:255',
-                'asset_serial' => 'required|string|max:255|unique:customer_assets,asset_serial,' . $id,
-            ]);
-
-            $response = $this->customerAssetRepository->update($id, $validatedData);
+            $response = $this->customerAssetRepository->update($id, $request->validated());
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
-        } catch (\Exception | ValidationException $e) {
-            if ($e instanceof ValidationException) {
-                return response()->json(['status' => false, 'errors' => $e->errors()], 422);
-            } else {
-                Log::error('Customer Asset Update Error: ' . $e->getMessage());
-                return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
-            }
+        } catch (\Exception $e) {
+            Log::error('Customer Asset Update Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
 

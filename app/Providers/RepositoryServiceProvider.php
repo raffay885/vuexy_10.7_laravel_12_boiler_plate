@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use App\Http\Interfaces\RoleRepositoryInterface;
-use App\Http\Repositories\RoleRepository;
-use App\Http\Interfaces\UserRepositoryInterface;
-use App\Http\Repositories\UserRepository;
-use App\Http\Interfaces\CustomerAssetRepositoryInterface;
-use App\Http\Repositories\CustomerAssetRepository;
-use App\Http\Interfaces\EstimateRepositoryInterface;
-use App\Http\Repositories\EstimateRepository;
+use App\Interfaces\RoleRepositoryInterface;
+use App\Repositories\RoleRepository;
+use App\Interfaces\UserRepositoryInterface;
+use App\Repositories\UserRepository;
+use App\Interfaces\CustomerAssetRepositoryInterface;
+use App\Repositories\CustomerAssetRepository;
+use App\Interfaces\EstimateRepositoryInterface;
+use App\Repositories\EstimateRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider

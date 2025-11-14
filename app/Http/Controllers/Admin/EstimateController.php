@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Interfaces\EstimateRepositoryInterface;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use App\Interfaces\EstimateRepositoryInterface;
+use App\Http\Requests\EstimateRequest;
 use Illuminate\Support\Facades\Log;
 class EstimateController extends Controller
 {
@@ -31,27 +30,14 @@ class EstimateController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(EstimateRequest $request)
     {
         try{
-            $validatedData = $request->validate([
-               'number' => 'required|string|max:255',
-               'date' => 'required|date',
-               'customer_id' => 'required|exists:users,id',
-               'asset_ids' => 'required|array',
-               'asset_ids.*' => 'required',
-               'note' => 'required|string|max:255',
-            ]);
-
-            $response = $this->estimateRepository->create($validatedData);
+            $response = $this->estimateRepository->create($request->validated());
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
-        } catch (\Exception | ValidationException $e) {
-            if ($e instanceof ValidationException) {
-                return response()->json(['status' => false, 'errors' => $e->errors()], 422);
-            } else {
-                Log::error('Estimate Creation Error: ' . $e->getMessage());
-                return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
-            }
+        } catch (\Exception $e) {
+            Log::error('Estimate Creation Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
 
@@ -74,7 +60,7 @@ class EstimateController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(EstimateRequest $request, string $id)
     {
         //
     }

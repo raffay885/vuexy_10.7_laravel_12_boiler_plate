@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Interfaces\RoleRepositoryInterface;
-use Illuminate\Http\Request;
+use App\Interfaces\RoleRepositoryInterface;
+use App\Http\Requests\RoleRequest;
+use Illuminate\Support\Facades\Log;
 
 class RoleController extends Controller
 {
@@ -19,7 +20,7 @@ class RoleController extends Controller
     public function index()
     {
         if(request()->ajax()){
-            return $this->roleRepository->roleForDataTable();
+            return $this->roleRepository->getDataTable();
         }
         return view($this->view . 'index', get_defined_vars());
     }
@@ -29,15 +30,23 @@ class RoleController extends Controller
      */
     public function create()
     {
-        //
+        $roles = $this->roleRepository->find();
+        $permissions = $this->roleRepository->getPermissions()->groupBy('parent_name');
+        return view($this->view . 'create', get_defined_vars());
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RoleRequest $request)
     {
-        //
+        try{
+            $response = $this->roleRepository->create($request->validated());
+            return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
+        } catch (\Exception $e) {
+            Log::error('Role Creation Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
+        }
     }
 
     /**
@@ -53,15 +62,23 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $role = $this->roleRepository->findOne(['id' => $id]);
+        $permissions = $this->roleRepository->getPermissions()->groupBy('parent_name');
+        return view($this->view . 'edit', get_defined_vars());
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(RoleRequest $request, string $id)
     {
-        //
+        try{
+            $response = $this->roleRepository->update($id, $request->validated());
+            return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
+        } catch (\Exception $e) {
+            Log::error('Role Update Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
+        }
     }
 
     /**
@@ -69,6 +86,12 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try{
+            $response = $this->roleRepository->delete($id);
+            return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
+        } catch (\Exception $e) {
+            Log::error('Role Delete Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
+        }
     }
 }

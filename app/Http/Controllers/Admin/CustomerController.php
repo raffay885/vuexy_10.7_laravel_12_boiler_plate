@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Interfaces\UserRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
+use App\Http\Requests\CustomerRequest;
 use App\Traits\Syncro;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 class CustomerController extends Controller
 {
@@ -39,25 +38,15 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CustomerRequest $request)
     {
         try{
-            $validatedData = $request->validate([
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email'
-            ]);
-
-            $data = [...$validatedData, 'user_type' => 'customer'];
+            $data = [...$request->validated(), 'user_type' => 'customer'];
             $response = $this->userRepository->create($data);
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
-        } catch (\Exception | ValidationException $e) {
-            if ($e instanceof ValidationException) {
-                return response()->json(['status' => false, 'errors' => $e->errors()], 422);
-            } else {
-                Log::error('Customer Creation Error: ' . $e->getMessage());
-                return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
-            }
+        } catch (\Exception $e) {
+            Log::error('Customer Creation Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
 
@@ -80,24 +69,14 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CustomerRequest $request, string $id)
     {
         try{
-            $validatedData = $request->validate([
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email,' . $id
-            ]);
-
-            $response = $this->userRepository->update($id, $validatedData);
+            $response = $this->userRepository->update($id, $request->validated());
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
-        } catch (\Exception | ValidationException $e) {
-            if ($e instanceof ValidationException) {
-                return response()->json(['status' => false, 'errors' => $e->errors()], 422);
-            } else {
-                Log::error('Customer Update Error: ' . $e->getMessage());
-                return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
-            }
+        } catch (\Exception $e) {
+            Log::error('Customer Update Error: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
 

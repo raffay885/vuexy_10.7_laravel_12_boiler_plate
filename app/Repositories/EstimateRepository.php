@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Repositories;
+namespace App\Repositories;
 
-use App\Http\Interfaces\EstimateRepositoryInterface;
+use App\Interfaces\EstimateRepositoryInterface;
 use App\Models\Estimate;
 use App\Traits\Syncro;
-use App\Http\Interfaces\UserRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
 
 class EstimateRepository implements EstimateRepositoryInterface{
 

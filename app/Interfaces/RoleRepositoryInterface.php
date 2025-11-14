@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Interfaces;
+namespace App\Interfaces;
 
-interface CustomerAssetRepositoryInterface{
-	
+interface RoleRepositoryInterface{
+
 	public function getDataTable(array $filters = []);
 
 	public function find(array $filters = []);
@@ -15,5 +15,7 @@ interface CustomerAssetRepositoryInterface{
 	public function update(int $id, array $data);
 
 	public function delete(int $id);
+
+	public function getPermissions(array $filters = []);
 
 }
