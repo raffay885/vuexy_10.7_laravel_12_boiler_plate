@@ -22,6 +22,7 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'syncro_customer_id',
+        'eset_company_id',
         'email',
         'password',
         'user_type',

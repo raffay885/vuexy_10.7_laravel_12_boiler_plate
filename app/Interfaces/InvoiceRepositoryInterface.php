@@ -2,11 +2,9 @@
 
 namespace App\Interfaces;
 
-interface EstimateRepositoryInterface{
+interface InvoiceRepositoryInterface{
 
 	public function find(array $filters = []);
-
-	public function findOne(array $filters = []);
 
 	public function create(array $data);
 

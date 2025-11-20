@@ -22,16 +22,15 @@ class EstimateRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-           'number' => 'required|string|max:255',
+            'syncro_product_id' => 'required',
+            'quantity' => 'required|integer|min:1',
             'date' => 'required|date',
             'customer_id' => 'required|exists:users,id',
-            'asset_ids' => 'required|array',
-            'asset_ids.*' => 'required',
             'note' => 'required|string|max:255',
         ];
 
         if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-            $rules['number'] = 'required|string|max:255|unique:estimates,number,' . $this->estimate;
+            
         }
 
         return $rules;

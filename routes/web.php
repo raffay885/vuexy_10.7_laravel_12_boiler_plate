@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CustomerAssetController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EstimateController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Webhook\SyncroWebhookController;
 
 Route::middleware('auth')->group(function () {
     // Dashboard
@@ -25,5 +26,8 @@ Route::middleware('auth')->group(function () {
     // Role
     Route::resource('roles', RoleController::class);
 });
+
+// Webhooks
+Route::post('webhook/syncro', [SyncroWebhookController::class, 'syncroWebhook']);
 
 require __DIR__.'/auth.php';

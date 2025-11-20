@@ -11,22 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('estimates', function (Blueprint $table) {
+        Schema::create('invoice', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id');
-            $table->string('syncro_estimate_id');
-            $table->string('syncro_product_id');
+            $table->unsignedBigInteger('estimate_id');
+            $table->string('syncro_invoice_id');
             $table->string('number');
             $table->date('date');
-            $table->string('estimate_invoice_id')->nullable();
-            $table->integer('quantity')->default(0);
-            $table->float('estimate_subtotal');
-            $table->float('estimate_total');
-            $table->float('estimate_tax');
-            $table->enum('status', ['Draft', 'Fresh', 'Approved', 'Declined', 'Invoice Made']);
-            $table->text('note');
+            $table->date('due_date');
+            $table->text('note')->nullable();
+            $table->float('subtotal');
+            $table->float('total');
+            $table->float('tax');
             $table->timestamps();
             $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('estimate_id')->references('id')->on('estimates')->onDelete('cascade');
         });
     }
 
@@ -35,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('estimates');
+        Schema::dropIfExists('invoice');
     }
 };

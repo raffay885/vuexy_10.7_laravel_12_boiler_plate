@@ -16,34 +16,48 @@ class EstimateRepository implements EstimateRepositoryInterface{
 		$this->userRepository = $userRepository;
 	}
 
+	public function find(array $filters = []){
+		$estimates = Estimate::query();
+		if(isset($filters['customer_id'])){
+			$estimates->where('customer_id', $filters['customer_id']);
+		}
+
+		return $estimates->orderBy('id', 'desc')->get();
+	}
+
+	public function findOne(array $filters = []){
+		$estimate = Estimate::query();
+		if(isset($filters['syncro_estimate_id'])){
+			$estimate->where('syncro_estimate_id', $filters['syncro_estimate_id']);
+		}
+
+		return $estimate->firstOrFail();
+	}
+
 	public function create(array $data){
 		try{
 			$customer = $this->userRepository->findOne(['id' => $data['customer_id']]);
-			$lineItems = [];
-
-			foreach($data['asset_ids'] as $assetId){
-				$lineItems[] = [
-					'item' => 'Asset ID: ' . $assetId,
-					'name' => 'Asset ID: ' . $assetId,
-					'quantity' => 1,
-				];
-			}
-
 			$syncroResponse = $this->syncroPost('estimates', [
-				'number' => $data['number'],
 				'date' => $data['date'],
 				'customer_id' => $customer->syncro_customer_id,
-				'status' => 'Fresh',
-				'line_items' => $lineItems,
+				'status' => 'Approved',
+				'line_items' => [
+					[
+						'product_id' => $data['syncro_product_id'],
+						'quantity' => $data['quantity'],
+					],
+				],
 				'note' => $data['note'],
 			]);
 
 			if($syncroResponse && isset($syncroResponse['estimate'])){
 				Estimate::create([
 					'customer_id' => $data['customer_id'],
-					'number' => $data['number'],
+					'number' => $syncroResponse['estimate']['number'],
 					'date' => $data['date'],
 					'note' => $data['note'],
+					'quantity' => $data['quantity'],
+					'syncro_product_id' => $data['syncro_product_id'],
 					'estimate_subtotal' => $syncroResponse['estimate']['subtotal'],
 					'estimate_total' => $syncroResponse['estimate']['total'],
 					'estimate_tax' => $syncroResponse['estimate']['tax'],

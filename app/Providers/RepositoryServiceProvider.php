@@ -10,6 +10,8 @@ use App\Interfaces\CustomerAssetRepositoryInterface;
 use App\Repositories\CustomerAssetRepository;
 use App\Interfaces\EstimateRepositoryInterface;
 use App\Repositories\EstimateRepository;
+use App\Interfaces\InvoiceRepositoryInterface;
+use App\Repositories\InvoiceRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -23,6 +25,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(CustomerAssetRepositoryInterface::class, CustomerAssetRepository::class);
         $this->app->bind(EstimateRepositoryInterface::class, EstimateRepository::class);
+        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
     }
 
     /**

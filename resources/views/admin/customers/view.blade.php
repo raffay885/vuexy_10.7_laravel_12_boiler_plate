@@ -45,14 +45,26 @@
 					<ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-sm-0 gap-2">
 						<li class="nav-item">
 							<a class="nav-link {{ request()->query('tab') == 'syncroDetails' ? 'active' : '' }}" href="{{ route('customers.details', $customer->id) }}?tab=syncroDetails">
-								<i class="icon-base ti tabler-user-check icon-sm me-1_5"></i> 
+								<i class="icon-base ti tabler-id icon-sm me-1_5"></i> 
 								Syncro Details
 							</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link {{ request()->query('tab') == 'customerAssets' ? 'active' : '' }}" href="{{ route('customers.details', $customer->id) }}?tab=customerAssets">
-								<i class="icon-base ti tabler-user-check icon-sm me-1_5"></i> 
+								<i class="icon-base ti tabler-device-desktop icon-sm me-1_5"></i> 
 								Customer Assets
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link {{ request()->query('tab') == 'customerEstimates' ? 'active' : '' }}" href="{{ route('customers.details', $customer->id) }}?tab=customerEstimates">
+								<i class="icon-base ti tabler-file-dollar icon-sm me-1_5"></i> 
+								Customer Estimates
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link {{ request()->query('tab') == 'customerInvoices' ? 'active' : '' }}" href="{{ route('customers.details', $customer->id) }}?tab=customerInvoices">
+								<i class="icon-base ti tabler-file-invoice icon-sm me-1_5"></i> 
+								Customer Invoices
 							</a>
 						</li>
 					</ul>
@@ -265,10 +277,9 @@
 				<div class="col-12">
 					<div class="card">
 						<div class="card-datatable table-responsive pt-0">
-							<table class="table" id="dataTable">
+							<table class="table customerAssets" id="dataTable">
 								<thead>
 									<tr>
-										<th class="not_include"></th>
 										<th>Sr #</th>
 										<th>Asset Name</th>
 										<th>Asset Type</th>
@@ -281,12 +292,6 @@
 								<tbody>
 									@foreach($customerAssets as $key => $customerAsset)
 										<tr>
-											<td class="not_include">
-												<div class="form-check">
-													<input class="form-check-input asset-checkbox" name="asset_id[]" value="{{ $customerAsset['id'] }}" type="checkbox" id="flexCheckDefault">
-													<label class="form-check-label" for="flexCheckDefault"></label>
-												</div>
-											</td>
 											<td>{{ $key + 1 }}</td>
 											<td>{{ $customerAsset['name'] }}</td>
 											<td>{{ $customerAsset['asset_type'] }}</td>
@@ -310,6 +315,83 @@
 						</div>
 					</div>
 				</div>
+			@elseif(request()->query('tab') == 'customerEstimates')
+				<div class="col-12">
+					<button class="btn btn-primary mb-2 float-end" data-bs-toggle="modal" data-bs-target="#createEstimateModal">Create Estimate</button>
+				</div>
+				<div class="col-12">
+					<div class="card">
+						<div class="card-datatable table-responsive pt-0">
+							<table class="table customerEstimates" id="dataTable" style="white-space: nowrap;">
+								<thead>
+									<tr>
+										<th>Sr #</th>
+										<th>Syncro Estimate ID</th>
+										<th>Number</th>
+										<th>Date</th>
+										<th>Status</th>
+										<th>Note</th>
+										<th>Subtotal</th>
+										<th>Tax</th>
+										<th>Total</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach($customerEstimates as $key => $customerEstimate)
+										<tr>
+											<td>{{ $key + 1 }}</td>
+											<td>{{ $customerEstimate->syncro_estimate_id }}</td>
+											<td>{{ $customerEstimate->number }}</td>
+											<td>{{ $customerEstimate->date }}</td>
+											<td>{{ $customerEstimate->status }}</td>
+											<td>{{ $customerEstimate->note }}</td>
+											<td>$ {{ number_format($customerEstimate->estimate_subtotal, 2) }}</td>
+											<td>$ {{ number_format($customerEstimate->estimate_tax, 2) }}</td>
+											<td>$ {{ number_format($customerEstimate->estimate_total, 2) }}</td>
+										</tr>
+									@endforeach
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			@elseif(request()->query('tab') == 'customerInvoices')
+				<div class="col-12">
+					<div class="card">
+						<div class="card-datatable table-responsive pt-0">
+							<table class="table customerInvoices" id="dataTable">
+								<thead>
+									<tr>
+										<th>Sr #</th>
+										<th>Syncro Estimate ID</th>
+										<th>Syncro Invoice ID</th>
+										<th>Number</th>
+										<th>Date</th>
+										<th>Due Date</th>
+										<th>Subtotal</th>
+										<th>Tax</th>
+										<th>Total</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach($customerInvoices as $key => $customerInvoice)
+										<tr>
+											<td>{{ $key + 1 }}</td>
+											<td>{{ $customerInvoice->estimate->syncro_estimate_id }}</td>
+											<td>{{ $customerInvoice->syncro_invoice_id }}</td>
+											<td>{{ $customerInvoice->number }}</td>
+											<td>{{ $customerInvoice->date }}</td>
+											<td>{{ $customerInvoice->due_date }}</td>
+											<td>$ {{ number_format($customerInvoice->subtotal, 2) }}</td>
+											<td>$ {{ number_format($customerInvoice->tax, 2) }}</td>
+											<td>$ {{ number_format($customerInvoice->total, 2) }}</td>
+										</tr>
+									@endforeach
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
 			@endif
 		</div>
 	</section>
@@ -322,20 +404,30 @@
 					<h5 class="modal-title">Create Estimate</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
-				<form data-href="{{ route('estimates.store') }}" data-redirect="{{ route('customers.details', $customer->id) }}?tab=customerAssets" class="ajax-form in_page_ajax_form_page_reload">
+				<form data-href="{{ route('estimates.store') }}" data-redirect="{{ route('customers.details', $customer->id) }}?tab=customerEstimates" class="ajax-form in_page_ajax_form_page_reload">
 					@csrf
 					<div class="modal-body">
 						<div class="row">
 							<div class="col-md-12 mb-3">
-								<label for="estimate-number" class="form-label">Estimate Number<b class="text-danger">*</b></label>
-								<input type="text" class="form-control" id="estimate-number" name="number" placeholder="Enter estimate number" required>
-							</div>
-							<div class="col-md-12 mb-3">
 								<label for="estimate-date" class="form-label">Estimate Date<b class="text-danger">*</b></label>
 								<input type="date" class="form-control" id="estimate-date" name="date" required>
 							</div>
+							<div class="col-md-12 mb-3">
+								<label for="syncro_product_id" class="form-label">Products<b class="text-danger">*</b></label>
+								<select name="syncro_product_id" id="syncro_product_id" class="select2 form-select" data-placeholder="Select Product" required>
+									<option value="">Select Product</option>
+									@if($products && !empty($products['products']))
+										@foreach($products['products'] as $product)
+											<option value="{{ $product['id'] }}">{{ $product['name'] }}</option>
+										@endforeach
+									@endif
+								</select>
+							</div>
+								<div class="col-md-12 mb-3">
+								<label for="quantity" class="form-label">Quantity<b class="text-danger">*</b></label>
+								<input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+							</div>
 							<input type="hidden" name="customer_id" value="{{ $customer->id }}">
-							<input type="hidden" name="asset_ids[]" id="asset_ids">
 							<div class="col-md-12 mb-3">
 								<label for="estimate-notes" class="form-label">Notes<b class="text-danger">*</b></label>
 								<textarea class="form-control" id="estimate-notes" name="note" rows="4" placeholder="Enter any additional notes" required></textarea>
@@ -512,14 +604,6 @@
 								}
 							}
 						]
-					},
-					{
-						text: '<i class="icon-base ti tabler-file-invoice me-1"></i>Create Estimate',
-						className: 'btn btn-primary waves-effect waves-light create-estimate',
-						init: function (api, node, config) {
-							$(node).removeClass('btn-secondary btn-outline-secondary');
-							$(node).addClass('btn-primary');
-						},
 					}
 				],
 				language: {
@@ -579,24 +663,7 @@
 				}
 			});
 		});
-
-		$(document).on('click', '.create-estimate', function() {
-			const assetIds = getCheckedAssetIds();
-			if (assetIds.length === 0) {
-				showToast('error', 'Please select at least one asset to create an estimate.');
-				return;
-			}
-
-			$('#asset_ids').val(assetIds);
-			$('#createEstimateModal').modal('show');
-		});
-
-		function getCheckedAssetIds() {
-			return $('.asset-checkbox:checked').map(function() {
-				return $(this).val();
-			}).get();
-		}
-
+		
 		function formatDate(dateString) {
 			if (!dateString){
 				return 'N/A'

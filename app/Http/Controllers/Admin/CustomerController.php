@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Interfaces\UserRepositoryInterface;
 use App\Http\Requests\CustomerRequest;
+use App\Interfaces\EstimateRepositoryInterface;
+use App\Interfaces\InvoiceRepositoryInterface;
 use App\Traits\Syncro;
 use Illuminate\Support\Facades\Log;
 class CustomerController extends Controller
@@ -13,10 +15,17 @@ class CustomerController extends Controller
     
     protected $view = 'admin.customers.';
     protected $userRepository;
+    protected $estimateRepository;
+    protected $invoiceRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository)
-    {
+    public function __construct(
+        UserRepositoryInterface $userRepository,
+        EstimateRepositoryInterface $estimateRepository,
+        InvoiceRepositoryInterface $invoiceRepository
+    ){
         $this->userRepository = $userRepository;
+        $this->estimateRepository = $estimateRepository;
+        $this->invoiceRepository = $invoiceRepository;
     }
 
     public function index()
@@ -114,8 +123,17 @@ class CustomerController extends Controller
                 }
 
                 break;
+
+            case 'customerEstimates':
+                $customerEstimates = $this->estimateRepository->find(['customer_id' => $id]);   
+                break;
+                
+            case 'customerInvoices':
+                $customerInvoices = $this->invoiceRepository->find(['customer_id' => $id]);
+                break;
         }
         
+        $products = $this->syncroGet('products');
         return view($this->view . 'view', get_defined_vars());
     }
 }
