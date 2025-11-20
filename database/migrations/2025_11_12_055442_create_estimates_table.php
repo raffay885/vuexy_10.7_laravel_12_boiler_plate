@@ -18,13 +18,15 @@ return new class extends Migration
             $table->string('syncro_product_id');
             $table->string('number');
             $table->date('date');
-            $table->string('estimate_invoice_id')->nullable();
+            $table->dateTime('approved_at')->nullable();
             $table->integer('quantity')->default(0);
             $table->float('estimate_subtotal');
             $table->float('estimate_total');
+            $table->float('invoice_total')->default(0);
             $table->float('estimate_tax');
             $table->enum('status', ['Draft', 'Fresh', 'Approved', 'Declined', 'Invoice Made']);
             $table->text('note');
+            $table->boolean('is_annual')->default(1)->comment('0 = General, 1 = Annual');
             $table->timestamps();
             $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
         });

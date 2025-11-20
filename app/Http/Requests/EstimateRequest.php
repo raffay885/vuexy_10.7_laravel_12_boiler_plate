@@ -24,14 +24,9 @@ class EstimateRequest extends FormRequest
         $rules = [
             'syncro_product_id' => 'required',
             'quantity' => 'required|integer|min:1',
-            'date' => 'required|date',
             'customer_id' => 'required|exists:users,id',
             'note' => 'required|string|max:255',
         ];
-
-        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-            
-        }
 
         return $rules;
     }

@@ -6,6 +6,7 @@
 			display: flex !important;
 			justify-content: end !important;
 		}
+		
 	</style>
 @endsection
 @section('content')
@@ -328,12 +329,14 @@
 										<th>Sr #</th>
 										<th>Syncro Estimate ID</th>
 										<th>Number</th>
-										<th>Date</th>
-										<th>Status</th>
 										<th>Note</th>
 										<th>Subtotal</th>
 										<th>Tax</th>
 										<th>Total</th>
+										<th>Status</th>
+										<th>Approved At</th>
+										<th>Created At</th>
+										<th>Updated At</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -342,12 +345,18 @@
 											<td>{{ $key + 1 }}</td>
 											<td>{{ $customerEstimate->syncro_estimate_id }}</td>
 											<td>{{ $customerEstimate->number }}</td>
-											<td>{{ $customerEstimate->date }}</td>
-											<td>{{ $customerEstimate->status }}</td>
-											<td>{{ $customerEstimate->note }}</td>
+											<td title="{{ $customerEstimate->note }}">
+												{{ Str::limit($customerEstimate->note, 30) }}
+											</td>
 											<td>$ {{ number_format($customerEstimate->estimate_subtotal, 2) }}</td>
 											<td>$ {{ number_format($customerEstimate->estimate_tax, 2) }}</td>
 											<td>$ {{ number_format($customerEstimate->estimate_total, 2) }}</td>
+											<td>{{ $customerEstimate->status }}</td>
+											<td>
+												{{ $customerEstimate->approved_at ? date('M d, Y h:i A', strtotime($customerEstimate->approved_at)) : 'N/A' }}
+											</td>
+											<td>{{ date('M d, Y h:i A', strtotime($customerEstimate->created_at)) }}</td>
+											<td>{{ date('M d, Y h:i A', strtotime($customerEstimate->updated_at)) }}</td>
 										</tr>
 									@endforeach
 								</tbody>
@@ -395,53 +404,6 @@
 			@endif
 		</div>
 	</section>
-
-	{{-- Create Estimate Modal --}}
-	<div class="modal fade" id="createEstimateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-		<div class="modal-dialog modal-lg" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Create Estimate</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<form data-href="{{ route('estimates.store') }}" data-redirect="{{ route('customers.details', $customer->id) }}?tab=customerEstimates" class="ajax-form in_page_ajax_form_page_reload">
-					@csrf
-					<div class="modal-body">
-						<div class="row">
-							<div class="col-md-12 mb-3">
-								<label for="estimate-date" class="form-label">Estimate Date<b class="text-danger">*</b></label>
-								<input type="date" class="form-control" id="estimate-date" name="date" required>
-							</div>
-							<div class="col-md-12 mb-3">
-								<label for="syncro_product_id" class="form-label">Products<b class="text-danger">*</b></label>
-								<select name="syncro_product_id" id="syncro_product_id" class="select2 form-select" data-placeholder="Select Product" required>
-									<option value="">Select Product</option>
-									@if($products && !empty($products['products']))
-										@foreach($products['products'] as $product)
-											<option value="{{ $product['id'] }}">{{ $product['name'] }}</option>
-										@endforeach
-									@endif
-								</select>
-							</div>
-								<div class="col-md-12 mb-3">
-								<label for="quantity" class="form-label">Quantity<b class="text-danger">*</b></label>
-								<input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
-							</div>
-							<input type="hidden" name="customer_id" value="{{ $customer->id }}">
-							<div class="col-md-12 mb-3">
-								<label for="estimate-notes" class="form-label">Notes<b class="text-danger">*</b></label>
-								<textarea class="form-control" id="estimate-notes" name="note" rows="4" placeholder="Enter any additional notes" required></textarea>
-							</div>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="submit" class="btn btn-primary">Create Estimate</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
 
 	{{-- Asset Details Modal --}}
 	<div class="modal fade" id="assetDetailsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
@@ -544,6 +506,53 @@
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 				</div>
+			</div>
+		</div>
+	</div>
+
+	{{-- Create Estimate Modal --}}
+	<div class="modal fade" id="createEstimateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Create Estimate</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<form data-href="{{ route('estimates.store') }}" data-redirect="{{ route('customers.details', $customer->id) }}?tab=customerEstimates" class="ajax-form in_page_ajax_form_page_reload">
+					@csrf
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-md-12 mb-3">
+								<label for="syncro_product_id" class="form-label">Products<b class="text-danger">*</b></label>
+								<select name="syncro_product_id" id="syncro_product_id" class="select2 form-select" data-placeholder="Select Product" required>
+									@if(isset($products) && isset($products['products']) && !empty($products['products']))
+										<option value="">Select Product</option>
+										@foreach($products['products'] as $product)
+											<option value="{{ $product['id'] }}">{{ $product['name'] }}</option>
+										@endforeach
+									@else
+										<option value="">No products found</option>
+									@endif
+								</select>
+							</div>
+								<div class="col-md-12 mb-3">
+								<label for="quantity" class="form-label">Quantity<b class="text-danger">*</b></label>
+								<input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+							</div>
+							<input type="hidden" name="customer_id" value="{{ $customer->id }}">
+							<div class="col-md-12 mb-4">
+								<label for="estimate-notes" class="form-label">Notes<b class="text-danger">*</b></label>
+								<textarea class="form-control" id="estimate-notes" name="note" rows="4" placeholder="Enter any additional notes" required></textarea>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 d-flex justify-content-end">
+								<button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+								<button type="submit" class="btn btn-primary">Create Estimate</button>
+							</div>
+						</div>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -664,6 +673,13 @@
 			});
 		});
 		
+		$(document).on('shown.bs.modal', function (event) {
+			const modal = $(event.target);
+			modal.find('.select2').select2({
+				dropdownParent: modal
+			});
+		});
+
 		function formatDate(dateString) {
 			if (!dateString){
 				return 'N/A'

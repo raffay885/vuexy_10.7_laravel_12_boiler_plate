@@ -33,6 +33,7 @@ class CustomerController extends Controller
         if(request()->ajax()){
             return $this->userRepository->getDataTable(['user_type' => 'customer']);
         }
+
         return view($this->view . 'index', get_defined_vars());
     }
 
@@ -52,6 +53,7 @@ class CustomerController extends Controller
         try{
             $data = [...$request->validated(), 'user_type' => 'customer'];
             $response = $this->userRepository->create($data);
+
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
         } catch (\Exception $e) {
             Log::error('Customer Creation Error: ' . $e->getMessage());
@@ -106,11 +108,15 @@ class CustomerController extends Controller
     public function details(string $id)
     {
         $customer = $this->userRepository->findOne(['id' => $id]);
+        if(!$customer){
+            abort(404);
+        }
+
         switch(request()->query('tab')) {
             case 'syncroDetails':
                 $customerDetails = [];
                 $customerSyncroDetails = $this->syncroGet('customers/' . $customer->syncro_customer_id);
-                if ($customerSyncroDetails) {
+                if ($customerSyncroDetails && isset($customerSyncroDetails['customer'])) {
                     $customerDetails = $customerSyncroDetails['customer'];
                 }
 
@@ -118,22 +124,22 @@ class CustomerController extends Controller
             case 'customerAssets':
                 $customerAssets = [];
                 $customerSyncroAssets = $this->syncroGet('customer_assets', ['customer_id' => $customer->syncro_customer_id]);
-                if($customerSyncroAssets){
+                if($customerSyncroAssets && isset($customerSyncroAssets['assets']) && !empty($customerSyncroAssets['assets'])){
                     $customerAssets = $customerSyncroAssets['assets'];
                 }
 
                 break;
 
             case 'customerEstimates':
-                $customerEstimates = $this->estimateRepository->find(['customer_id' => $id]);   
+                $products = $this->syncroGet('products');
+                $customerEstimates = $this->estimateRepository->find(['customer_id' => $customer->id]);   
                 break;
                 
             case 'customerInvoices':
-                $customerInvoices = $this->invoiceRepository->find(['customer_id' => $id]);
+                $customerInvoices = $this->invoiceRepository->find(['customer_id' => $customer->id]);
                 break;
         }
         
-        $products = $this->syncroGet('products');
         return view($this->view . 'view', get_defined_vars());
     }
 }

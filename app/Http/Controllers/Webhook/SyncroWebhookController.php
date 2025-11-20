@@ -32,38 +32,42 @@ class SyncroWebhookController extends Controller
                 return;
             }
 
-            // Create eset customer
-            if(!$estimate->customer->eset_company_id){
+            // Create ESET Customer
+            if(!$estimate?->customer?->eset_company_id){
                 $esetCustomerResponse = $this->esetPost('/Company/Create/customer', [
-                    "name" => $estimate->customer->first_name . ' ' . $estimate->customer->last_name,
-                    "customIdentifier" => "Syncro-" . $estimate->customer->syncro_customer_id,
-                    "email" => $estimate->customer->email
+                    "name" => $estimate?->customer?->first_name . ' ' . $estimate?->customer?->last_name,
+                    "customIdentifier" => "Syncro-" . $estimate?->customer?->syncro_customer_id,
+                    "email" => $estimate?->customer?->email
                 ]);
     
                 if($esetCustomerResponse && isset($esetCustomerResponse['companyId'])){
-                    $estimate->customer->update([
-                        'eset_company_id' => $esetCustomerResponse['companyId']
-                    ]);
+                    $estimate->customer->update(['eset_company_id' => $esetCustomerResponse['companyId']]);
                 }
             }
 
             // Order License
-            $orderLicenseResponse = $this->esetPost('/License/Order', [
-                "quantity" => $estimate->quantity,
-                "productCode" => $estimate->syncro_product_id,
-                "customerId" => $estimate->customer->eset_company_id,
-                "licenseType" => "1"
-            ]);
+            // $orderLicenseResponse = $this->esetPost('/License/Order', [
+            //     "quantity" => $estimate->quantity,
+            //     "productCode" => $estimate->syncro_product_id,
+            //     "customerId" => $estimate->customer->eset_company_id,
+            //     "licenseType" => "1"
+            // ]);
 
-            // Create Invoice
-            // if($orderLicenseResponse){
-                $this->invoiceRepository->create(['syncro_estimate_id' => $request->estimate_id]);
-            // }
+            $orderLicenseResponse = true;
+            if(!$orderLicenseResponse){
+                Log::error('Failed to order license: ' . $request->estimate_id);
+                return;
+            }
 
-            return response()->json(['status' => true, 'message' => 'Webhook received successfully'], 200);
+            $invoiceResponse = $this->invoiceRepository->create(['syncro_estimate_id' => $request->estimate_id]);
+            if(!$invoiceResponse['status']){
+                Log::error('Failed to create invoice: ' . $request->estimate_id);
+                return;
+            }
+
+            Log::info('Syncro Webhook completed successfully');
         } catch (\Exception $e) {
             Log::error('Syncro Webhook Error: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
 }

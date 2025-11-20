@@ -20,34 +20,48 @@ class InvoiceRepository implements InvoiceRepositoryInterface{
 	}
 
 	public function find(array $filters = []){
-		$invoices = Invoice::query();
-		if(isset($filters['customer_id'])){
-			$invoices->where('customer_id', $filters['customer_id']);
-		}
-
-		return $invoices->orderBy('id', 'desc')->get();
+		return Invoice::where([ ...$filters ])->orderBy('id', 'desc')->get();
 	}
 
 	public function create(array $data){
 		try{
 			$estimate = $this->estimateRepository->findOne(['syncro_estimate_id' => $data['syncro_estimate_id']]);
-			$syncroResponse = $this->syncroPost('invoices', [
-				"customer_id" => $estimate->customer->syncro_customer_id,
-				"number" => $estimate->number,
-				"date" => $estimate->date,
+			if(!$estimate){
+				return ['status' => false, 'message' => 'Estimate not found', 'statusCode' => 404];
+			}
+
+			if($estimate->is_approved){
+				return ['status' => false, 'message' => 'Estimate already approved', 'statusCode' => 400];
+			}
+			
+			// $syncroResponse = $this->syncroPost('invoices', [
+			// 	"customer_id" => $estimate->customer->syncro_customer_id,
+			// 	"number" => $estimate->number,
+			// 	"date" => $estimate->date,
+			// 	"note" => $estimate->note,
+			// 	"total" => $estimate->invoice_total,
+			// 	"line_items" => [
+			// 		[
+			// 			"product_id" => $estimate->syncro_product_id,
+			// 			"quantity" => $estimate->quantity
+			// 		]
+			// 	]
+			// ]);
+
+			$syncroResponse['invoice'] = [
+				"id" => 'INV-' . rand(10000000, 99999999),
+				"date" => now()->format('Y-m-d'),
+				"due_date" => now()->format('Y-m-d'),
+				"subtotal" => $estimate->invoice_total,
+				"total" => $estimate->invoice_total,
+				"tax" => 0,
 				"note" => $estimate->note,
-				"hardwarecost" => $estimate->estimate_subtotal,
-				"line_items" => [
-					[
-						"product_id" => $estimate->syncro_product_id,
-						"quantity" => $estimate->quantity
-					]
-				]
-			]);
+				"number" => 'INV-' . rand(10000000, 99999999),
+			];
 
 			Log::info('Syncro Response: ' . json_encode($syncroResponse));
 			if($syncroResponse && isset($syncroResponse['invoice'])){
-				$invoice = Invoice::create([
+				Invoice::create([
 					'estimate_id' => $estimate->id,
 					'customer_id' => $estimate->customer->id,
 					'number' => $syncroResponse['invoice']['number'],
@@ -57,10 +71,14 @@ class InvoiceRepository implements InvoiceRepositoryInterface{
 					'total' => $syncroResponse['invoice']['total'],
 					'tax' => $syncroResponse['invoice']['tax'],
 					'note' => $syncroResponse['invoice']['note'],
-					'syncro_invoice_id' => $syncroResponse['invoice']['id'],
+					'syncro_invoice_id' => $syncroResponse['invoice']['id']
 				]);
 
-				Log::info('Invoice Created: ' . json_encode($invoice));
+				$estimate->update([
+					'status' => 'Approved',
+					'approved_at' => now()->format('Y-m-d')
+				]);
+
 				return ['status' => true, 'message' => 'Invoice created successfully', 'statusCode' => 200];
 			}
 

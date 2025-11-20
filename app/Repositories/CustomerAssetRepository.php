@@ -17,26 +17,15 @@ class CustomerAssetRepository implements CustomerAssetRepositoryInterface{
 	}
 
 	public function getDataTable(array $filters = []){
-		$customerAssets = $this->find($filters);
-		return DataTables::of($customerAssets)->addIndexColumn()->make(true);
+		return DataTables::of($this->find([ ...$filters ]))->addIndexColumn()->make(true);
 	}
 
 	public function find(array $filters = []){
-		$customerAssets = CustomerAsset::with('customer');
-		if(isset($filters['customer_id'])){
-			$customerAssets->where('customer_id', $filters['customer_id']);
-		}
-
-		return $customerAssets->orderBy('id', 'desc')->get();
+		return CustomerAsset::with('customer')->where([ ...$filters ])->orderBy('id', 'desc')->get();
 	}
 
 	public function findOne(array $filters = []){
-		$customerAssets = CustomerAsset::query();
-		if(isset($filters['id'])){
-			$customerAssets->where('id', $filters['id']);
-		}
-
-		return $customerAssets->firstOrFail();
+		return CustomerAsset::with('customer')->where([ ...$filters ])->orderBy('id', 'desc')->first();
 	}
 
 	public function create(array $data){
@@ -65,6 +54,10 @@ class CustomerAssetRepository implements CustomerAssetRepositoryInterface{
 	public function update(int $id, array $data){
 		try{
 			$customerAsset = $this->findOne(['id' => $id]);
+			if(!$customerAsset){
+				return ['status' => false, 'message' => 'Customer asset not found', 'statusCode' => 404];
+			}
+
 			$syncroResponse = $this->syncroPut('customer_assets/' . $customerAsset->syncro_asset_id, [
 				...$data,
 				'properties' => (object)[],
@@ -88,8 +81,11 @@ class CustomerAssetRepository implements CustomerAssetRepositoryInterface{
 	public function delete(int $id){
 		try{
 			$customerAsset = $this->findOne(['id' => $id]);
-			$customerAsset->delete();
-			
+			if(!$customerAsset){
+				return ['status' => false, 'message' => 'Customer asset not found', 'statusCode' => 404];
+			}
+
+			$customerAsset->delete();			
 			return ['status' => true, 'message' => 'Customer asset deleted successfully', 'statusCode' => 200];
 		} catch (\Exception $e) {
 			return ['status' => false, 'message' => 'Uh-oh! Something went wrong.', 'statusCode' => 500];
