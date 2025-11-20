@@ -14,10 +14,7 @@ class RoleRepository implements RoleRepositoryInterface{
 	}
 
 	public function find(array $filters = []){
-		return Role::where([
-			...$filters,
-			'id' => '!=', 1
-		])->orderBy('id', 'desc')->get();
+		return Role::where([ ...$filters ])->whereNotIn('id', [1,2])->orderBy('id', 'desc')->get();
 	}
 
 	public function findOne(array $filters = []){

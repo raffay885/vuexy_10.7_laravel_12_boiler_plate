@@ -16,7 +16,13 @@ class UserRepository implements UserRepositoryInterface{
 	}
 
 	public function find(array $filters = []){
-		return User::where([ ...$filters ])->orderBy('id', 'desc')->get();
+		$users = User::where([ ...$filters ]);
+		if(isset($filters['user_type']) && $filters['user_type'] == 'admin'){
+			$users = $users->whereNotIn('id', [1]);
+		}
+		$users = $users->orderBy('id', 'desc')->get();
+		
+		return $users;
 	}
 
 	public function findOne(array $filters = []){

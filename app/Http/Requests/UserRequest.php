@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RoleRequest extends FormRequest
+class UserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +22,17 @@ class RoleRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|string|max:255|unique:roles,name',
-            'permissions' => 'required|array|min:1',
-            'permissions.*' => 'exists:permissions,name',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'password_confirmation' => 'required|string|min:8|confirmed'
         ];
 
         if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-            $rules['name'] = 'required|string|max:255|unique:roles,name,' . $this->role;
+            $rules['email'] = 'required|email|unique:users,email,' . $this->user;
+            $rules['password'] = 'nullable|string|min:8';
+            $rules['password_confirmation'] = 'nullable|string|min:8|confirmed';
         }
 
         return $rules;

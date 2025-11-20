@@ -3,24 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Interfaces\RoleRepositoryInterface;
-use App\Http\Requests\RoleRequest;
+use App\Http\Requests\UserRequest;
+use Illuminate\Http\Request;
+use App\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
-class RoleController extends Controller
+class UserController extends Controller
 {
-    protected $view = 'admin.roles.';
-    protected $roleRepository;
+    protected $view = 'admin.users.';
+    protected $userRepository;
 
-    public function __construct(RoleRepositoryInterface $roleRepository)
+    public function __construct(UserRepositoryInterface $userRepository)
     {
-        $this->roleRepository = $roleRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function index()
     {
         if(request()->ajax()){
-            return $this->roleRepository->getDataTable();
+            return $this->userRepository->getDataTable(['user_type' => 'admin']);
         }
 
         return view($this->view . 'index', get_defined_vars());
@@ -31,22 +32,21 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $roles = $this->roleRepository->find();
-        $permissions = $this->roleRepository->getPermissions()->groupBy('parent_name');
-        
-        return view($this->view . 'create', get_defined_vars());
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(RoleRequest $request)
+    public function store(UserRequest $request)
     {
         try{
-            $response = $this->roleRepository->create($request->validated());
+            $data = [...$request->validated(), 'user_type' => 'admin'];
+            $response = $this->userRepository->create($data);
+
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
         } catch (\Exception $e) {
-            Log::error('Role Creation Error: ' . $e->getMessage());
+            Log::error('Admin User Creation Error: ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
@@ -64,21 +64,19 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        $role = $this->roleRepository->findOne(['id' => $id]);
-        $permissions = $this->roleRepository->getPermissions()->groupBy('parent_name');
-        return view($this->view . 'edit', get_defined_vars());
+        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(RoleRequest $request, string $id)
+    public function update(UserRequest $request, string $id)
     {
         try{
-            $response = $this->roleRepository->update($id, $request->validated());
+            $response = $this->userRepository->update($id, $request->validated());
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
         } catch (\Exception $e) {
-            Log::error('Role Update Error: ' . $e->getMessage());
+            Log::error('Admin User Update Error: ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
@@ -89,10 +87,10 @@ class RoleController extends Controller
     public function destroy(string $id)
     {
         try{
-            $response = $this->roleRepository->delete($id);
+            $response = $this->userRepository->delete($id);
             return response()->json(['status' => $response['status'], 'message' => $response['message']], $response['statusCode']);
         } catch (\Exception $e) {
-            Log::error('Role Delete Error: ' . $e->getMessage());
+            Log::error('Admin User Delete Error: ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => 'Uh-oh! Something went wrong.'], 500);
         }
     }
