@@ -327,9 +327,10 @@
 								<thead>
 									<tr>
 										<th>Sr #</th>
-										<th>Syncro Estimate ID</th>
+										<th>Syncro ID</th>
+										<th>Product ID</th>
 										<th>Number</th>
-										<th>Note</th>
+										<th>Quantity</th>
 										<th>Subtotal</th>
 										<th>Tax</th>
 										<th>Total</th>
@@ -344,16 +345,29 @@
 										<tr>
 											<td>{{ $key + 1 }}</td>
 											<td>{{ $customerEstimate->syncro_estimate_id }}</td>
-											<td>{{ $customerEstimate->number }}</td>
-											<td title="{{ $customerEstimate->note }}">
-												{{ Str::limit($customerEstimate->note, 30) }}
-											</td>
+											<td>{{ $customerEstimate->syncro_product_id }}</td>
+											<td>{{ $customerEstimate->syncro_estimate_number }}</td>
+											<td>{{ $customerEstimate->quantity }}</td>
 											<td>$ {{ number_format($customerEstimate->estimate_subtotal, 2) }}</td>
 											<td>$ {{ number_format($customerEstimate->estimate_tax, 2) }}</td>
 											<td>$ {{ number_format($customerEstimate->estimate_total, 2) }}</td>
-											<td>{{ $customerEstimate->status }}</td>
 											<td>
-												{{ $customerEstimate->approved_at ? date('M d, Y h:i A', strtotime($customerEstimate->approved_at)) : 'N/A' }}
+												<span class="badge 
+													@if($customerEstimate->status == 'Draft') bg-label-secondary
+													@elseif($customerEstimate->status == 'Fresh') bg-label-info
+													@elseif($customerEstimate->status == 'Approved') bg-label-success
+													@elseif($customerEstimate->status == 'Declined') bg-label-danger
+													@elseif($customerEstimate->status == 'Invoice Made') bg-label-primary
+													@else bg-label-secondary
+													@endif
+												">
+													{{ $customerEstimate->status }}
+												</span>
+											</td>
+											<td>
+												{{ 
+													$customerEstimate->approved_at ? date('M d, Y h:i A', strtotime($customerEstimate->approved_at)) : 'N/A' 
+												}}
 											</td>
 											<td>{{ date('M d, Y h:i A', strtotime($customerEstimate->created_at)) }}</td>
 											<td>{{ date('M d, Y h:i A', strtotime($customerEstimate->updated_at)) }}</td>

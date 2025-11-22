@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\EstimateController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Webhook\SyncroWebhookController;
+use App\Http\Controllers\Webhook\WebhookController;
 
 Route::middleware('auth')->group(function () {
     // Dashboard
@@ -36,6 +36,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // Webhooks
-Route::post('webhook/syncro', [SyncroWebhookController::class, 'syncroWebhook']);
+Route::post('webhook/approveEstimate', [WebhookController::class, 'approveEstimate']);
 
 require __DIR__.'/auth.php';

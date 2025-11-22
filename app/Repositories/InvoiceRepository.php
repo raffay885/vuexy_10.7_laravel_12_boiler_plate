@@ -43,32 +43,33 @@ class InvoiceRepository implements InvoiceRepositoryInterface{
 				return ['status' => false, 'message' => 'Estimate already approved', 'statusCode' => 400];
 			}
 			
-			// $syncroResponse = $this->syncroPost('invoices', [
-			// 	"customer_id" => $estimate->customer->syncro_customer_id,
-			// 	"number" => $estimate->number,
-			// 	"date" => $estimate->date,
-			// 	"note" => $estimate->note,
-			// 	"total" => $estimate->invoice_total,
-			// 	"line_items" => [
-			// 		[
-			// 			"product_id" => $estimate->syncro_product_id,
-			// 			"quantity" => $estimate->quantity
-			// 		]
-			// 	]
-			// ]);
-
-			$syncroResponse['invoice'] = [
-				"id" => 'INV-' . rand(10000000, 99999999),
-				"date" => now()->format('Y-m-d'),
-				"due_date" => now()->format('Y-m-d'),
-				"subtotal" => $estimate->invoice_total,
-				"total" => $estimate->invoice_total,
-				"tax" => 0,
+			$syncroResponse = $this->syncroPost('invoices', [
+				"customer_id" => $estimate->customer->syncro_customer_id,
+				"number" => $estimate->number,
+				"date" => $estimate->date,
 				"note" => $estimate->note,
-				"number" => 'INV-' . rand(10000000, 99999999),
-			];
+				"total" => $estimate->invoice_total,
+				"line_items" => [
+					[
+						"product_id" => $estimate->syncro_product_id,
+						"quantity" => $estimate->quantity
+					]
+				]
+			]);
 
-			Log::info('Syncro Response: ' . json_encode($syncroResponse));
+			// Dummy
+			// $syncroResponse['invoice'] = [
+			// 	"id" => 'INV-' . rand(10000000, 99999999),
+			// 	"date" => now()->format('Y-m-d'),
+			// 	"due_date" => now()->format('Y-m-d'),
+			// 	"subtotal" => $estimate->invoice_total,
+			// 	"total" => $estimate->invoice_total,
+			// 	"tax" => 0,
+			// 	"note" => $estimate->note,
+			// 	"number" => 'INV-' . rand(10000000, 99999999),
+			// ];
+
+			Log::info('Create Invoice Syncro Response: ' . json_encode($syncroResponse));
 			if($syncroResponse && isset($syncroResponse['invoice'])){
 				Invoice::create([
 					'estimate_id' => $estimate->id,

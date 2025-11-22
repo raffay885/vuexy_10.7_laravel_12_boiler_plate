@@ -9,7 +9,7 @@ use App\Interfaces\EstimateRepositoryInterface;
 use App\Traits\Eset;
 use App\Interfaces\InvoiceRepositoryInterface;
 
-class SyncroWebhookController extends Controller
+class WebhookController extends Controller
 {
     use Eset;
     protected $estimateRepository;
@@ -23,7 +23,7 @@ class SyncroWebhookController extends Controller
         $this->invoiceRepository = $invoiceRepository;
     }
 
-    public function syncroWebhook(Request $request){
+    public function approveEstimate(Request $request){
         try{
             Log::info('Syncro Webhook Request: ' . json_encode($request->all()));
             $estimate = $this->estimateRepository->findOne(['syncro_estimate_id' => $request->estimate_id]);
@@ -40,20 +40,24 @@ class SyncroWebhookController extends Controller
                     "email" => $estimate?->customer?->email
                 ]);
     
-                if($esetCustomerResponse && isset($esetCustomerResponse['companyId'])){
-                    $estimate->customer->update(['eset_company_id' => $esetCustomerResponse['companyId']]);
+                Log::info('Create ESET Customer Response: ' . json_encode($esetCustomerResponse));
+                if(!$esetCustomerResponse || !isset($esetCustomerResponse['companyId'])){
+                    Log::error('Failed to create ESET Customer: ' . $request->estimate_id);
+                    return;
                 }
+
+                $estimate->customer->update(['eset_company_id' => $esetCustomerResponse['companyId']]);
             }
 
             // Order License
-            // $orderLicenseResponse = $this->esetPost('/License/Order', [
-            //     "quantity" => $estimate->quantity,
-            //     "productCode" => $estimate->syncro_product_id,
-            //     "customerId" => $estimate->customer->eset_company_id,
-            //     "licenseType" => "1"
-            // ]);
+            $orderLicenseResponse = $this->esetPost('/License/Order', [
+                "quantity" => 1,
+                "productCode" => 2000,
+                "customerId" => $estimate->customer->eset_company_id,
+                "licenseType" => 1
+            ]);
 
-            $orderLicenseResponse = true;
+            Log::info('Order License Response: ' . json_encode($orderLicenseResponse));
             if(!$orderLicenseResponse){
                 Log::error('Failed to order license: ' . $request->estimate_id);
                 return;
@@ -65,9 +69,9 @@ class SyncroWebhookController extends Controller
                 return;
             }
 
-            Log::info('Syncro Webhook completed successfully');
+            Log::info('Approve Estimate Webhook completed successfully');
         } catch (\Exception $e) {
-            Log::error('Syncro Webhook Error: ' . $e->getMessage());
+            Log::error('Approve Estimate Webhook Error: ' . $e->getMessage());
         }
     }
 }

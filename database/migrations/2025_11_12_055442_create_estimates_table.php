@@ -13,17 +13,16 @@ return new class extends Migration
     {
         Schema::create('estimates', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id');
+            $table->unsignedBigInteger('customer_id')->comment('customers');
             $table->string('syncro_estimate_id');
             $table->string('syncro_product_id');
-            $table->string('number');
-            $table->date('date');
-            $table->dateTime('approved_at')->nullable();
+            $table->string('syncro_estimate_number');
+            $table->float('syncro_estimate_subtotal')->default(0);
+            $table->float('syncro_estimate_total')->default(0);
+            $table->float('syncro_estimate_tax')->default(0);
             $table->integer('quantity')->default(0);
-            $table->float('estimate_subtotal');
-            $table->float('estimate_total');
+            $table->dateTime('approved_at')->nullable();
             $table->float('invoice_total')->default(0);
-            $table->float('estimate_tax');
             $table->enum('status', ['Draft', 'Fresh', 'Approved', 'Declined', 'Invoice Made']);
             $table->text('note');
             $table->boolean('is_annual')->default(1)->comment('0 = General, 1 = Annual');

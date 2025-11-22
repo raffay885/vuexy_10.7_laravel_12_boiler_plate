@@ -6,6 +6,7 @@ use App\Interfaces\UserRepositoryInterface;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\User;
 use App\Traits\Syncro;
+use Illuminate\Support\Facades\Log;
 
 class UserRepository implements UserRepositoryInterface{
 	
@@ -37,6 +38,7 @@ class UserRepository implements UserRepositoryInterface{
 		try{
 			$syncroCustomerId = null;
 			$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
+			Log::info('Get Customer Syncro Response: ' . json_encode($syncroResponse));
 
 			if(!$syncroResponse || !isset($syncroResponse['customers']) || empty($syncroResponse['customers'])){
 				return ['status' => false, 'message' => 'Uh-oh! Email not found in Syncro', 'statusCode' => 404];
@@ -63,6 +65,7 @@ class UserRepository implements UserRepositoryInterface{
 
 			$syncroCustomerId = null;
 			$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
+			Log::info('Update Customer Syncro Response: ' . json_encode($syncroResponse));
 
 			if(!$syncroResponse || !isset($syncroResponse['customers']) || empty($syncroResponse['customers'])){
 				return ['status' => false, 'message' => 'Uh-oh! Email not found in Syncro', 'statusCode' => 404];

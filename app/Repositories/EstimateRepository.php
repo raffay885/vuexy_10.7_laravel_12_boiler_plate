@@ -8,6 +8,7 @@ use App\Traits\Syncro;
 use App\Interfaces\UserRepositoryInterface;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class EstimateRepository implements EstimateRepositoryInterface{
 
@@ -40,14 +41,15 @@ class EstimateRepository implements EstimateRepositoryInterface{
 			if(!$customer){
 				return ['status' => false, 'message' => 'Customer not found', 'statusCode' => 404];
 			}
-
+			
 			$syncroProductResponse = $this->syncroGet('products/' . $data['syncro_product_id']);
+			Log::info('Get Product Syncro Response: ' . json_encode($syncroProductResponse));
+			
 			if(!$syncroProductResponse || !isset($syncroProductResponse['product'])){
 				return ['status' => false, 'message' => 'Product not found', 'statusCode' => 404];
 			}
 
-			// $productPrice = $syncroProductResponse['product']['price_retail'];
-			$productPrice = 120;
+			$productPrice = $syncroProductResponse['product']['price_retail'];
 			$assetAmountPerMonth = $productPrice * $data['quantity'];
 			$invoiceTotal = $assetAmountPerMonth * 12;
 
@@ -65,43 +67,44 @@ class EstimateRepository implements EstimateRepositoryInterface{
 				$this->findOne(['customer_id' => $data['customer_id'], 'status' => 'Approved', 'is_annual' => 1])->update(['is_annual' => 0]);
 			}
 			
-			// $syncroResponse = $this->syncroPost('estimates', [
-			// 	'date' => now()->format('Y-m-d'),
-			// 	'customer_id' => $customer->syncro_customer_id,
-			// 	'status' => 'Fresh',
-			// 	'line_items' => [
-			// 		[
-			// 			'product_id' => $data['syncro_product_id'],
-			// 			'quantity' => $data['quantity'],
-			// 		],
-			// 	],
-			// 	'note' => $data['note'],
-			// ]);
-
-			$syncroResponse['estimate'] = [
-				'number' => 'EST-' . rand(10000000, 99999999),
-				'subtotal' => $invoiceTotal,
-				'total' => $invoiceTotal,
-				'tax' => 0,
+			$syncroResponse = $this->syncroPost('estimates', [
+				'date' => now()->format('Y-m-d'),
+				'customer_id' => $customer->syncro_customer_id,
 				'status' => 'Fresh',
-				'id' => 'EST-' . rand(10000000, 99999999),
-			];
+				'line_items' => [
+					[
+						'product_id' => $data['syncro_product_id'],
+						'quantity' => $data['quantity'],
+					],
+				],
+				'note' => $data['note'],
+			]);
 
+			// Dummy 
+			// $syncroResponse['estimate'] = [
+			// 	'number' => 'EST-' . rand(10000000, 99999999),
+			// 	'subtotal' => $invoiceTotal,
+			// 	'total' => $invoiceTotal,
+			// 	'tax' => 0,
+			// 	'status' => 'Fresh',
+			// 	'id' => 'EST-' . rand(10000000, 99999999),
+			// ];
+
+			Log::info('Create Estimate Syncro Response: ' . json_encode($syncroResponse));
 			if($syncroResponse && isset($syncroResponse['estimate'])){
 				Estimate::create([
 					'customer_id' => $data['customer_id'],
-					'number' => $syncroResponse['estimate']['number'],
-					'date' => now()->format('Y-m-d'),
-					'note' => $data['note'],
-					'quantity' => $data['quantity'],
-					'syncro_product_id' => $data['syncro_product_id'],
-					'estimate_subtotal' => $syncroResponse['estimate']['subtotal'],
-					'estimate_total' => $syncroResponse['estimate']['total'],
-					'estimate_tax' => $syncroResponse['estimate']['tax'],
 					'syncro_estimate_id' => $syncroResponse['estimate']['id'],
+					'syncro_estimate_number' => $syncroResponse['estimate']['number'],
+					'syncro_product_id' => $data['syncro_product_id'],
+					'quantity' => $data['quantity'],
+					'syncro_estimate_subtotal' => $syncroResponse['estimate']['subtotal'],
+					'syncro_estimate_total' => $syncroResponse['estimate']['total'],
+					'syncro_estimate_tax' => $syncroResponse['estimate']['tax'],
 					'status' => $syncroResponse['estimate']['status'],
-					'invoice_total' => $invoiceTotal,
+					'note' => $data['note'],
 					'is_annual' => isset($annualEstimate) ? 0 : 1,
+					'invoice_total' => $invoiceTotal,
 				]);
 
 				return ['status' => true, 'message' => 'Estimate created successfully', 'statusCode' => 200];
