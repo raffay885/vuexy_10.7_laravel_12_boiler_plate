@@ -8,6 +8,7 @@ use App\Traits\Eset;
 use App\Traits\Syncro;
 use App\Interfaces\EstimateRepositoryInterface;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class InvoiceRepository implements InvoiceRepositoryInterface{
 
@@ -19,8 +20,16 @@ class InvoiceRepository implements InvoiceRepositoryInterface{
 		$this->estimateRepository = $estimateRepository;
 	}
 
+	public function getDataTable(array $filters = []){
+		return DataTables::of($this->find([ ...$filters ]))->addIndexColumn()->make(true);
+	}
+
 	public function find(array $filters = []){
-		return Invoice::where([ ...$filters ])->orderBy('id', 'desc')->get();
+		return Invoice::with(['customer', 'estimate'])->where([ ...$filters ])->orderBy('id', 'desc')->get();
+	}
+
+	public function count(array $filters = []){
+		return Invoice::where([ ...$filters ])->count();
 	}
 
 	public function create(array $data){

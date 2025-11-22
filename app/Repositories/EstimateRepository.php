@@ -6,6 +6,7 @@ use App\Interfaces\EstimateRepositoryInterface;
 use App\Models\Estimate;
 use App\Traits\Syncro;
 use App\Interfaces\UserRepositoryInterface;
+use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 
 class EstimateRepository implements EstimateRepositoryInterface{
@@ -17,12 +18,20 @@ class EstimateRepository implements EstimateRepositoryInterface{
 		$this->userRepository = $userRepository;
 	}
 
+	public function getDataTable(array $filters = []){
+		return DataTables::of($this->find([ ...$filters ]))->addIndexColumn()->make(true);
+	}
+
 	public function find(array $filters = []){
-		return Estimate::where([ ...$filters ])->orderBy('id', 'desc')->get();
+		return Estimate::with('customer')->where([ ...$filters ])->orderBy('id', 'desc')->get();
 	}
 
 	public function findOne(array $filters = []){
 		return Estimate::where([ ...$filters ])->orderBy('id', 'desc')->first();
+	}
+
+	public function count(array $filters = []){
+		return Estimate::where([ ...$filters ])->count();
 	}
 
 	public function create(array $data){

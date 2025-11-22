@@ -4,19 +4,34 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Interfaces\EstimateRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
 use App\Http\Requests\EstimateRequest;
 use Illuminate\Support\Facades\Log;
+use App\Traits\Syncro;
 class EstimateController extends Controller
 {
+    protected $view = 'admin.estimates.';
     protected $estimateRepository;
+    protected $userRepository;
+    use Syncro;
 
-    public function __construct(EstimateRepositoryInterface $estimateRepository){
+    public function __construct(
+        EstimateRepositoryInterface $estimateRepository,
+        UserRepositoryInterface $userRepository
+    ){
         $this->estimateRepository = $estimateRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function index()
     {
-        //
+        if(request()->ajax()){
+            return $this->estimateRepository->getDataTable();
+        }
+
+        $customers = $this->userRepository->find(['user_type' => 'customer']);
+        $products = $this->syncroGet('products');
+        return view($this->view . 'index', get_defined_vars());
     }
 
     /**

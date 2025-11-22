@@ -15,18 +15,22 @@ class UserRepository implements UserRepositoryInterface{
 		return DataTables::of($this->find([ ...$filters ]))->addIndexColumn()->make(true);
 	}
 
-	public function find(array $filters = []){
+	public function find(array $filters = [], $limit = null){
 		$users = User::where([ ...$filters ]);
 		if(isset($filters['user_type']) && $filters['user_type'] == 'admin'){
 			$users = $users->whereNotIn('id', [1]);
 		}
-		$users = $users->orderBy('id', 'desc')->get();
 		
+		$users = $users->orderBy('id', 'desc')->limit($limit)->get();
 		return $users;
 	}
 
 	public function findOne(array $filters = []){
 		return User::where([ ...$filters ])->orderBy('id', 'desc')->first();
+	}
+
+	public function count(array $filters = []){
+		return User::where([ ...$filters ])->count();
 	}
 
 	public function create(array $data){

@@ -26,19 +26,24 @@
                 <div data-i18n="Dashboard">Dashboard</div>
             </a>
         </li>
-        <li class="menu-item {{ request()->segment(1) == 'customers' || request()->segment(1) == 'customer-assets' ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <li class="menu-item {{ \Route::getFacadeRoot()->current()->uri() == '/customers' ? 'active' : '' }}">
+            <a href="{{ route('customers.index') }}" class="menu-link">
                 <i class="menu-icon icon-base ti tabler-users"></i>
                 <div data-i18n="Customers">Customers</div>
             </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->segment(1) == 'customers' ? 'active' : '' }}">
-                    <a href="{{ route('customers.index') }}" class="menu-link">
-                        <div data-i18n="Customers">Customers</div>
-                    </a>
-                </li>
-            </ul>
-        </li> 
+        </li>
+        <li class="menu-item {{ \Route::getFacadeRoot()->current()->uri() == '/estimates' ? 'active' : '' }}">
+            <a href="{{ route('estimates.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-file-invoice"></i>
+                <div data-i18n="Estimates">Estimates</div>
+            </a>
+        </li>
+        <li class="menu-item {{ \Route::getFacadeRoot()->current()->uri() == '/invoices' ? 'active' : '' }}">
+            <a href="{{ route('invoices.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-receipt"></i>
+                <div data-i18n="Invoices">Invoices</div>
+            </a>
+        </li>
         {{-- <li class="menu-item {{ request()->segment(1) == 'roles' || request()->segment(1) == 'users' ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon icon-base ti tabler-users"></i>

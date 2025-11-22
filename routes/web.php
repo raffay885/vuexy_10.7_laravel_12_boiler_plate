@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CustomerAssetController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EstimateController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Webhook\SyncroWebhookController;
@@ -23,6 +24,9 @@ Route::middleware('auth')->group(function () {
 
     // Estimates
     Route::resource('estimates', EstimateController::class);
+
+    // Invoices
+    Route::resource('invoices', InvoiceController::class);
 
     // Role
     Route::resource('roles', RoleController::class);
