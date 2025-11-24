@@ -6,6 +6,7 @@ use App\Interfaces\UserRepositoryInterface;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\User;
 use App\Traits\Syncro;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class UserRepository implements UserRepositoryInterface{
@@ -13,17 +14,13 @@ class UserRepository implements UserRepositoryInterface{
 	use Syncro;
 
 	public function getDataTable(array $filters = []){
-		return DataTables::of($this->find([ ...$filters ]))->addIndexColumn()->make(true);
+		return DataTables::of($this->find([ ...$filters ]))->addIndexColumn()->addColumn('role', function($row){
+			return $row->getRoleNames()->first() ?? '';
+		})->make(true);
 	}
 
 	public function find(array $filters = [], $limit = null){
-		$users = User::where([ ...$filters ]);
-		if(isset($filters['user_type']) && $filters['user_type'] == 'admin'){
-			$users = $users->whereNotIn('id', [1]);
-		}
-		
-		$users = $users->orderBy('id', 'desc')->limit($limit)->get();
-		return $users;
+		return User::where([ ...$filters ])->where('id', '!=', 1)->orderBy('id', 'desc')->limit($limit)->get();
 	}
 
 	public function findOne(array $filters = []){
@@ -36,21 +33,34 @@ class UserRepository implements UserRepositoryInterface{
 
 	public function create(array $data){
 		try{
-			$syncroCustomerId = null;
-			$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
-			Log::info('Get Customer Syncro Response: ' . json_encode($syncroResponse));
-
-			if(!$syncroResponse || !isset($syncroResponse['customers']) || empty($syncroResponse['customers'])){
-				return ['status' => false, 'message' => 'Uh-oh! Email not found in Syncro', 'statusCode' => 404];
-			}
-
-			$syncroCustomerId = $syncroResponse['customers'][0]['id'];
-			$user = User::create([...$data, 'syncro_customer_id' => $syncroCustomerId]);
 			if($data['user_type'] == 'customer'){
+				$syncroCustomerId = null;
+				$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
+				Log::info('Get Customer Syncro Response: ' . json_encode($syncroResponse));
+
+				if(!$syncroResponse || !isset($syncroResponse['customers']) || empty($syncroResponse['customers'])){
+					return ['status' => false, 'message' => 'Uh-oh! Email not found in Syncro', 'statusCode' => 404];
+				}
+
+				$syncroCustomerId = $syncroResponse['customers'][0]['id'];
+				$user = User::create([
+					...$data,
+					'syncro_customer_id' => $syncroCustomerId,
+					'password' => Hash::make(generateRandomPassword()),
+				]);
+
 				$user->assignRole('Customer');
+			}else{
+				$user = User::create([
+					...$data,
+					'password' => Hash::make($data['password']),
+				]);
+
+				$user->syncRoles($data['role']);
 			}
-		
+
 			return ['status' => true, 'message' => 'User created successfully', 'statusCode' => 200];
+		
 		} catch (\Exception $e) {
 			return ['status' => false, 'message' => 'Uh-oh! Something went wrong.', 'statusCode' => 500];
 		}
@@ -63,16 +73,20 @@ class UserRepository implements UserRepositoryInterface{
 				return ['status' => false, 'message' => 'User not found', 'statusCode' => 404];
 			}
 
-			$syncroCustomerId = null;
-			$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
-			Log::info('Update Customer Syncro Response: ' . json_encode($syncroResponse));
+			if($user->user_type == 'customer'){
+				$syncroCustomerId = null;
+				$syncroResponse = $this->syncroGet('customers', ['email' => $data['email']]);
+				Log::info('Update Customer Syncro Response: ' . json_encode($syncroResponse));
 
-			if(!$syncroResponse || !isset($syncroResponse['customers']) || empty($syncroResponse['customers'])){
-				return ['status' => false, 'message' => 'Uh-oh! Email not found in Syncro', 'statusCode' => 404];
+				if(!$syncroResponse || !isset($syncroResponse['customers']) || empty($syncroResponse['customers'])){
+					return ['status' => false, 'message' => 'Uh-oh! Email not found in Syncro', 'statusCode' => 404];
+				}
+
+				$syncroCustomerId = $syncroResponse['customers'][0]['id'];
+				$user->update([...$data, 'syncro_customer_id' => $syncroCustomerId]);
+			}else{
+				$user->update([...$data]);
 			}
-
-			$syncroCustomerId = $syncroResponse['customers'][0]['id'];
-			$user->update([...$data, 'syncro_customer_id' => $syncroCustomerId]);
 
 			return ['status' => true, 'message' => 'User updated successfully', 'statusCode' => 200];
 		} catch (\Exception $e) {
