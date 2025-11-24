@@ -35,7 +35,7 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item mt-0" href="pages-account-settings-account.html">
+                        <a class="dropdown-item mt-0" href="{{ route('profile.index') }}">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-2">
                                     <div class="avatar avatar-online">
@@ -53,14 +53,18 @@
                         <div class="dropdown-divider my-1 mx-n2"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="javascript:void(0);">
-                            <i class="icon-base ti tabler-user me-3 icon-md"></i><span class="align-middle">My
-                                Profile</span>
+                        <a class="dropdown-item" href="{{ route('profile.index') }}">
+                            <i class="icon-base ti tabler-user me-3 icon-md"></i>
+                            <span class="align-middle">My Profile</span>
+                        </a>
+                        <a class="dropdown-item" href="{{ route('profile.changePassword.index') }}">
+                            <i class="icon-base ti tabler-lock me-3 icon-md"></i>
+                            <span class="align-middle">Change Password</span>
                         </a>
                     </li>
-                    {{-- <li>
+                    <li>
                         <div class="dropdown-divider my-1 mx-n2"></div>
-                    </li> --}}
+                    </li>
                     <li>
                         <div class="d-grid px-2 pt-2 pb-1">
                             <form method="POST" action="{{ route('logout') }}">

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Webhook\WebhookController;
+use App\Http\Controllers\Admin\ProfileController;
 
 Route::middleware('auth')->group(function () {
     // Dashboard
@@ -33,6 +34,12 @@ Route::middleware('auth')->group(function () {
 
     // Admin Users
     Route::resource('users', UserController::class);
+
+    // Profile
+    Route::get('profile', [ProfileController::class, 'profile'])->name('profile.index');
+    Route::post('profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::get('profile/changePassword', [ProfileController::class, 'changePassword'])->name('profile.changePassword.index');
+    Route::post('profile/changePassword', [ProfileController::class, 'updatePassword'])->name('profile.changePassword.update');
 });
 
 // Webhooks

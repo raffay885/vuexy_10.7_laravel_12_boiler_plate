@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserRequest extends FormRequest
+class ChangePasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,19 +21,9 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'role' => 'required|string|max:255',
+        return [
+            'current_password' => 'required|string|min:8',
             'password' => 'required|string|min:8|confirmed',
         ];
-
-        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-            $rules['email'] = 'required|email|unique:users,email,' . $this->user;
-            $rules['password'] = 'nullable|string|min:8|confirmed';
-        }
-
-        return $rules;
     }
 }

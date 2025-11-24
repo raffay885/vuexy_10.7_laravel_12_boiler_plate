@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
-class UserRequest extends FormRequest
+class ProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,19 +22,10 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'role' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed',
+            'email' => 'required|email|unique:users,email,' . Auth::user()->id,
         ];
-
-        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-            $rules['email'] = 'required|email|unique:users,email,' . $this->user;
-            $rules['password'] = 'nullable|string|min:8|confirmed';
-        }
-
-        return $rules;
     }
 }

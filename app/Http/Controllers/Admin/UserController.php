@@ -6,16 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\RoleRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     protected $view = 'admin.users.';
     protected $userRepository;
-
-    public function __construct(UserRepositoryInterface $userRepository)
+    protected $roleRepository;
+    public function __construct(
+        UserRepositoryInterface $userRepository,
+        RoleRepositoryInterface $roleRepository
+    )
     {
         $this->userRepository = $userRepository;
+        $this->roleRepository = $roleRepository;
     }
 
     public function index()
@@ -24,6 +29,7 @@ class UserController extends Controller
             return $this->userRepository->getDataTable(['user_type' => 'admin']);
         }
 
+        $roles = $this->roleRepository->find();
         return view($this->view . 'index', get_defined_vars());
     }
 
