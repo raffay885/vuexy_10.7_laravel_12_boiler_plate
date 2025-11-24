@@ -14,8 +14,12 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $permissionsData = [
+            'Estimate Management' => ['show-estimates', 'create-estimates', 'edit-estimates', 'delete-estimates'],
+            'Invoice Management' => ['show-invoices', 'create-invoices', 'edit-invoices', 'delete-invoices'],
+            'Customer Management' => ['show-customers', 'create-customers', 'edit-customers', 'delete-customers'],
+            'Customer Asset Management' => ['show-customer-assets', 'create-customer-assets', 'edit-customer-assets', 'delete-customer-assets'],
+            'Role Management' => ['show-roles', 'create-roles', 'edit-roles', 'delete-roles'],
             'User Management' => ['show-users', 'create-users', 'edit-users', 'delete-users'],
-            'Role Management' => ['show-roles', 'create-roles', 'edit-roles', 'delete-roles']
         ];
 
         $permissionsToUpsert = [];

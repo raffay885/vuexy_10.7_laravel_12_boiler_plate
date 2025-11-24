@@ -4,7 +4,7 @@
     <section>
         <div class="card">
             <div class="card-datatable table-responsive pt-0">
-                <table class="table" id="dataTable">
+                <table class="table" id="dataTable" style="white-space: nowrap;">
                     <thead>
                         <tr>
 							<th class="not_include"></th>
@@ -40,7 +40,14 @@
 						data: 'customerName',
 						name: 'customerName',
 						render: function(data, type, row) {
-							return `${row?.customer?.first_name} ${row?.customer?.last_name}`;
+							let customerDetailsUrl = "{{ route('customers.details', ':id') }}?tab=syncroDetails".replace(':id', row?.customer?.id);
+							return `
+								<a href="${customerDetailsUrl}">
+									${row?.customer?.first_name} ${row?.customer?.last_name}
+									<br>
+									<small class="text-muted">Syncro ID: ${row?.customer?.syncro_customer_id}</small>
+								</a>
+							`;
 						}
 					},
                     { data: 'syncro_invoice_id' },

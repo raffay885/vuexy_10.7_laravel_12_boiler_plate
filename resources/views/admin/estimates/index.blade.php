@@ -4,7 +4,7 @@
     <section>
         <div class="card">
             <div class="card-datatable table-responsive pt-0">
-                <table class="table" id="dataTable">
+                <table class="table" id="dataTable" style="white-space: nowrap;">
                     <thead>
                         <tr>
 							<th class="not_include"></th>
@@ -99,31 +99,38 @@
 						data: 'customerName',
 						name: 'customerName',
 						render: function(data, type, row) {
-							return `${row?.customer?.first_name} ${row?.customer?.last_name}`;
+							let customerDetailsUrl = "{{ route('customers.details', ':id') }}?tab=syncroDetails".replace(':id', row?.customer?.id);
+							return `
+								<a href="${customerDetailsUrl}">
+									${row?.customer?.first_name} ${row?.customer?.last_name}
+									<br>
+									<small class="text-muted">Syncro ID: ${row?.customer?.syncro_customer_id}</small>
+								</a>
+							`;
 						}
 					},
                     { data: 'number' },
                     { data: 'syncro_estimate_id' },
                     { data: 'syncro_product_id' },
                     { 
-						data: 'estimate_subtotal',
-						name: 'estimate_subtotal',
+						data: 'syncro_estimate_subtotal',
+						name: 'syncro_estimate_subtotal',
 						render: function(data, type, row) {
-							return `$${row.estimate_subtotal.toFixed(2)}`;
+							return `$ ${row.syncro_estimate_subtotal.toFixed(2)}`;
 						}
 					},
                     { 
-						data: 'estimate_tax',
-						name: 'estimate_tax',
+						data: 'syncro_estimate_tax',
+						name: 'syncro_estimate_tax',
 						render: function(data, type, row) {
-							return `$${row.estimate_tax.toFixed(2)}`;
+							return `$ ${row.syncro_estimate_tax.toFixed(2)}`;
 						}
 					},
                     { 
-						data: 'estimate_total',
-						name: 'estimate_total',
+						data: 'syncro_estimate_total',
+						name: 'syncro_estimate_total',
 						render: function(data, type, row) {
-							return `$${row.estimate_total.toFixed(2)}`;
+							return `$ ${row.syncro_estimate_total.toFixed(2)}`;
 						}
 					},
                     {
