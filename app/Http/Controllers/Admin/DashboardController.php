@@ -35,13 +35,13 @@ class DashboardController extends Controller
     public function dashboard()
     {
         // Revenue Tracking
-        $monthlyRevenue = Invoice::whereMonth('date', now()->month)->whereYear('date', now()->year)->sum('total');
-        $lastMonthRevenue = Invoice::whereMonth('date', now()->subMonth()->month)->whereYear('date', now()->subMonth()->year) ->sum('total');
+        $monthlyRevenue = Invoice::whereMonth('syncro_invoice_date', now()->month)->whereYear('syncro_invoice_date', now()->year)->sum('syncro_invoice_total');
+        $lastMonthRevenue = Invoice::whereMonth('syncro_invoice_date', now()->subMonth()->month)->whereYear('syncro_invoice_date', now()->subMonth()->year) ->sum('syncro_invoice_total');
         $revenueGrowth = $lastMonthRevenue > 0 ? round((($monthlyRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
 
         // Invoices Overview
         $totalInvoices = $this->invoiceRepository->count();
-        $newInvoicesThisMonth = Invoice::whereMonth('date', now()->month)->whereYear('date', now()->year)->count();
+        $newInvoicesThisMonth = Invoice::whereMonth('syncro_invoice_date', now()->month)->whereYear('syncro_invoice_date', now()->year)->count();
 
         // Estimates Overview
         $totalEstimates = $this->estimateRepository->count();
@@ -59,13 +59,13 @@ class DashboardController extends Controller
         $monthLabels = [];
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $revenue = Invoice::whereMonth('date', $date->month)->whereYear('date', $date->year)->sum('total');
+            $revenue = Invoice::whereMonth('syncro_invoice_date', $date->month)->whereYear('syncro_invoice_date', $date->year)->sum('syncro_invoice_total');
             $monthlyRevenueData[] = round($revenue, 2);
             $monthLabels[] = $date->format('M Y');
         }
 
         // Top Customers by Revenue
-        $topCustomers = Invoice::with('customer')->select('customer_id', DB::raw('SUM(total) as total_revenue'))
+        $topCustomers = Invoice::with('customer')->select('customer_id', DB::raw('SUM(syncro_invoice_total) as total_revenue'))
         ->groupBy('customer_id')->orderBy('total_revenue', 'desc')->limit(5)
         ->get();
 

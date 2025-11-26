@@ -52,7 +52,7 @@ class WebhookController extends Controller
             // Order License
             $orderLicenseResponse = $this->esetPost('/License/Order', [
                 "quantity" => 1,
-                "productCode" => 2000,
+                "productCode" => 2015,
                 "customerId" => $estimate->customer->eset_company_id,
                 "licenseType" => 1
             ]);
@@ -63,7 +63,11 @@ class WebhookController extends Controller
                 return;
             }
 
-            $invoiceResponse = $this->invoiceRepository->create(['syncro_estimate_id' => $request->estimate_id]);
+            $invoiceResponse = $this->invoiceRepository->create([
+                'syncro_estimate_id' => $request->estimate_id,
+                'eset_license_key' => $orderLicenseResponse['publicLicenseKey']
+            ]);
+
             if(!$invoiceResponse['status']){
                 Log::error('Failed to create invoice: ' . $request->estimate_id);
                 return;

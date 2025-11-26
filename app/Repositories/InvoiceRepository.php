@@ -72,16 +72,17 @@ class InvoiceRepository implements InvoiceRepositoryInterface{
 			Log::info('Create Invoice Syncro Response: ' . json_encode($syncroResponse));
 			if($syncroResponse && isset($syncroResponse['invoice'])){
 				Invoice::create([
-					'estimate_id' => $estimate->id,
 					'customer_id' => $estimate->customer->id,
-					'number' => $syncroResponse['invoice']['number'],
-					'date' => $syncroResponse['invoice']['date'],
-					'due_date' => $syncroResponse['invoice']['due_date'],
-					'subtotal' => $syncroResponse['invoice']['subtotal'],
-					'total' => $syncroResponse['invoice']['total'],
-					'tax' => $syncroResponse['invoice']['tax'],
-					'note' => $syncroResponse['invoice']['note'],
-					'syncro_invoice_id' => $syncroResponse['invoice']['id']
+					'estimate_id' => $estimate->id,
+					'syncro_invoice_id' => $syncroResponse['invoice']['id'],
+					'syncro_invoice_number' => $syncroResponse['invoice']['number'],
+					'syncro_invoice_date' => $syncroResponse['invoice']['date'],
+					'syncro_invoice_due_date' => $syncroResponse['invoice']['due_date'],
+					'syncro_invoice_subtotal' => $syncroResponse['invoice']['subtotal'],
+					'syncro_invoice_total' => $syncroResponse['invoice']['total'],
+					'syncro_invoice_tax' => $syncroResponse['invoice']['tax'],
+					'syncro_invoice_note' => $syncroResponse['invoice']['note'],
+					'eset_license_key' => $data['eset_license_key'] ?? null,
 				]);
 
 				$estimate->update([

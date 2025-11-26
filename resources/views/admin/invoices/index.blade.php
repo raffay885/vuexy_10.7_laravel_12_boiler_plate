@@ -13,10 +13,11 @@
 							<th>Invoice ID</th>
 							<th>Estimate ID</th>
 							<th>Invoice Number</th>
+							<th>Invoice Date</th>
+							<th>License Key</th>
 							<th>Subtotal</th>
 							<th>Tax</th>
 							<th>Total</th>
-							<th>Created At</th>
                         </tr>
                     </thead>
                 </table>
@@ -52,41 +53,48 @@
 					},
                     { data: 'syncro_invoice_id' },
                     {
-						data: 'estimate',
-						name: 'estimate',
+						data: 'syncro_estimate_id',
+						name: 'syncro_estimate_id',
 						render: function(data, type, row) {
 							return `${row?.estimate?.syncro_estimate_id}`;
 						}
 					},
-                    { data: 'number' },
+                    { data: 'syncro_invoice_number' },
                     { 
-						data: 'subtotal',
-						name: 'subtotal',
+						data: 'syncro_invoice_date',
+						name: 'syncro_invoice_date',
 						render: function(data, type, row) {
-							return `$${row.subtotal.toFixed(2)}`;
+							return formatDate(row.syncro_invoice_date);
 						}
 					},
                     { 
-						data: 'tax',
-						name: 'tax',
+						data: 'eset_license_key',
+						name: 'eset_license_key',
 						render: function(data, type, row) {
-							return `$${row.tax.toFixed(2)}`;
+							return row.eset_license_key || '-';
 						}
 					},
                     { 
-						data: 'total',
-						name: 'total',
+						data: 'syncro_invoice_subtotal',
+						name: 'syncro_invoice_subtotal',
 						render: function(data, type, row) {
-							return `$${row.total.toFixed(2)}`;
+							return `$${row.syncro_invoice_subtotal.toFixed(2)}`;
 						}
 					},
                     { 
-						data: 'created_at',
-						name: 'created_at',
+						data: 'syncro_invoice_tax',
+						name: 'syncro_invoice_tax',
 						render: function(data, type, row) {
-							return formatDate(row.created_at);
+							return `$${row.syncro_invoice_tax.toFixed(2)}`;
 						}
 					},
+                    { 
+						data: 'syncro_invoice_total',
+						name: 'syncro_invoice_total',
+						render: function(data, type, row) {
+							return `$${row.syncro_invoice_total.toFixed(2)}`;
+						}
+					}
                 ],
                 searchPlaceholder: 'Search invoices...',
             });

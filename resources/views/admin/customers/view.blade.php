@@ -386,11 +386,11 @@
 								<thead>
 									<tr>
 										<th>Sr #</th>
-										<th>Syncro Estimate ID</th>
-										<th>Syncro Invoice ID</th>
-										<th>Number</th>
-										<th>Date</th>
-										<th>Due Date</th>
+										<th>Estimate ID</th>
+										<th>Invoice ID</th>
+										<th>Invoice Number</th>
+										<th>Invoice Date</th>
+										<th>License Key</th>
 										<th>Subtotal</th>
 										<th>Tax</th>
 										<th>Total</th>
@@ -402,12 +402,12 @@
 											<td>{{ $key + 1 }}</td>
 											<td>{{ $customerInvoice->estimate->syncro_estimate_id }}</td>
 											<td>{{ $customerInvoice->syncro_invoice_id }}</td>
-											<td>{{ $customerInvoice->number }}</td>
-											<td>{{ $customerInvoice->date }}</td>
-											<td>{{ $customerInvoice->due_date }}</td>
-											<td>$ {{ number_format($customerInvoice->subtotal, 2) }}</td>
-											<td>$ {{ number_format($customerInvoice->tax, 2) }}</td>
-											<td>$ {{ number_format($customerInvoice->total, 2) }}</td>
+											<td>{{ $customerInvoice->syncro_invoice_number }}</td>
+											<td>{{ $customerInvoice->syncro_invoice_date }}</td>
+											<td>{{ $customerInvoice->eset_license_key }}</td>
+											<td>$ {{ number_format($customerInvoice->syncro_invoice_subtotal, 2) }}</td>
+											<td>$ {{ number_format($customerInvoice->syncro_invoice_tax, 2) }}</td>
+											<td>$ {{ number_format($customerInvoice->syncro_invoice_total, 2) }}</td>
 										</tr>
 									@endforeach
 								</tbody>

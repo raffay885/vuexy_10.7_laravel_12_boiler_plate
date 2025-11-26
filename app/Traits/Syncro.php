@@ -2,8 +2,10 @@
 
 namespace App\Traits;
 
+use App\Models\SystemLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 trait Syncro{
 
@@ -40,6 +42,17 @@ trait Syncro{
 	public function syncroGet(string $endpoint, array $params = []){
 		try{
 			$response = $this->syncroClient()->get("{$this->baseUrl}/{$endpoint}", $params);
+			SystemLog::create([
+				'user_id' => Auth::check() ? Auth::id() : null,
+				'source' => 'syncro',
+				'end_point' => $endpoint,
+				'method' => 'GET',
+				'http_code' => $response->status(),
+				'payload' => json_encode($params),
+				'error_message' => !$response->successful() ? $response->body() : null,
+				'status' => $response->successful() ? 'success' : 'error',
+			]);
+
 			if ($response->successful()) {
 				return $response->json();
 			}
@@ -55,6 +68,17 @@ trait Syncro{
 	public function syncroPost(string $endpoint, array $payload = []){
 		try{
 			$response = $this->syncroClient()->post("{$this->baseUrl}/{$endpoint}", $payload);
+			SystemLog::create([
+				'user_id' => Auth::check() ? Auth::id() : null,
+				'source' => 'syncro',
+				'end_point' => $endpoint,
+				'method' => 'POST',
+				'http_code' => $response->status(),
+				'payload' => json_encode($payload),
+				'error_message' => !$response->successful() ? $response->body() : null,
+				'status' => $response->successful() ? 'success' : 'error',
+			]);
+
 			if ($response->successful()) {
 				return $response->json();
 			}
@@ -70,6 +94,17 @@ trait Syncro{
 	public function syncroPut(string $endpoint, array $payload = []){
 		try{
 			$response = $this->syncroClient()->put("{$this->baseUrl}/{$endpoint}", $payload);
+			SystemLog::create([
+				'user_id' => Auth::check() ? Auth::id() : null,
+				'source' => 'syncro',
+				'end_point' => $endpoint,
+				'method' => 'PUT',
+				'http_code' => $response->status(),
+				'payload' => json_encode($payload),
+				'error_message' => !$response->successful() ? $response->body() : null,
+				'status' => $response->successful() ? 'success' : 'error',
+			]);
+
 			if ($response->successful()) {
 				return $response->json();
 			}
