@@ -12,10 +12,11 @@ use App\Interfaces\EstimateRepositoryInterface;
 use App\Repositories\EstimateRepository;
 use App\Interfaces\InvoiceRepositoryInterface;
 use App\Repositories\InvoiceRepository;
-use App\Interfaces\SystemLogRepositoryInterface;
-use App\Repositories\SystemLogRepository;
 use Illuminate\Support\ServiceProvider;
-
+use App\Interfaces\SyncroProductRepositoryInterface;
+use App\Repositories\SyncroProductRepository;
+use App\Interfaces\EsetProductRepositoryInterface;
+use App\Repositories\EsetProductRepository;
 class RepositoryServiceProvider extends ServiceProvider
 {
     /**
@@ -28,7 +29,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(CustomerAssetRepositoryInterface::class, CustomerAssetRepository::class);
         $this->app->bind(EstimateRepositoryInterface::class, EstimateRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
-        $this->app->bind(SystemLogRepositoryInterface::class, SystemLogRepository::class);
+        $this->app->bind(SyncroProductRepositoryInterface::class, SyncroProductRepository::class);
+        $this->app->bind(EsetProductRepositoryInterface::class, EsetProductRepository::class);
     }
 
     /**

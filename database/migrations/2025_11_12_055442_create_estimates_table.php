@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('customer_id')->comment('customers');
             $table->string('syncro_estimate_id');
-            $table->string('syncro_product_id');
+            $table->unsignedBigInteger('syncro_product_id')->nullable()->comment('syncro_products');
             $table->string('syncro_estimate_number');
             $table->float('syncro_estimate_subtotal')->default(0);
             $table->float('syncro_estimate_total')->default(0);
@@ -28,6 +28,7 @@ return new class extends Migration
             $table->boolean('is_annual')->default(1)->comment('0 = General, 1 = Annual');
             $table->timestamps();
             $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('syncro_product_id')->references('id')->on('syncro_products')->onDelete('cascade');
         });
     }
 

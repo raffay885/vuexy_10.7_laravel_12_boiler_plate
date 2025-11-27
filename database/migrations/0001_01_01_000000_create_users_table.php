@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('user_type', ['admin', 'customer'])->default('customer');
+            $table->enum('billing_type', ['monthly', 'annual'])->default('annual');
             $table->rememberToken();
             $table->timestamps();
         });

@@ -38,24 +38,26 @@ class InvoiceRepository implements InvoiceRepositoryInterface{
 			if(!$estimate){
 				return ['status' => false, 'message' => 'Estimate not found', 'statusCode' => 404];
 			}
-
-			if($estimate->is_approved){
-				return ['status' => false, 'message' => 'Estimate already approved', 'statusCode' => 400];
-			}
 			
-			$syncroResponse = $this->syncroPost('invoices', [
-				"customer_id" => $estimate->customer->syncro_customer_id,
-				"number" => $estimate->number,
-				"date" => $estimate->date,
-				"note" => $estimate->note,
-				"total" => $estimate->invoice_total,
-				"line_items" => [
-					[
-						"product_id" => $estimate->syncro_product_id,
-						"quantity" => $estimate->quantity
+			if($estimate->is_annual){
+				// Convert Estimate to Syncro Invoice
+				$syncroResponse = $this->syncroPost('estimates/' . $estimate->syncro_estimate_id . '/convert_to_invoice');
+			}else{
+				// Create Syncro Invoice
+				$syncroResponse = $this->syncroPost('invoices', [
+					"customer_id" => $estimate->customer->syncro_customer_id,
+					"number" => $estimate->syncro_estimate_number,
+					"date" => now()->format('Y-m-d'),
+					"note" => $estimate->note,
+					"total" => $estimate->invoice_total,
+					"line_items" => [
+						[
+							"product_id" => $estimate->syncroProduct->syncro_product_id,
+							"quantity" => $estimate->quantity
+						]
 					]
-				]
-			]);
+				]);
+			}
 
 			// Dummy
 			// $syncroResponse['invoice'] = [

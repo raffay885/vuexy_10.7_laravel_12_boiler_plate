@@ -121,7 +121,7 @@
 		</div>
 
 		<!-- Estimates Status -->
-		<div class="col-xxl-6 col-lg-6">
+		<div class="col-xxl-4 col-lg-4">
 			<div class="card h-100">
 			<div class="card-header d-flex align-items-center justify-content-between">
 				<div class="card-title mb-0">
@@ -172,8 +172,60 @@
 			</div>
 		</div>
 
+		<!-- Sync Status Chart -->
+		<div class="col-xxl-4 col-lg-4">
+			<div class="card h-100">
+				<div class="card-header d-flex align-items-center justify-content-between">
+					<div class="card-title mb-0">
+						<h5 class="m-0 me-2">Sync Status Overview</h5>
+					</div>
+					<div class="dropdown">
+						<button class="btn btn-text-secondary rounded-pill p-2 me-n1" type="button" id="syncStatusDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<i class="icon-base ti tabler-dots-vertical icon-md text-body-secondary"></i>
+						</button>
+						<div class="dropdown-menu dropdown-menu-end" aria-labelledby="syncStatusDropdown">
+							<a class="dropdown-item" href="{{ route('system-logs.index') }}?source=syncro">View All</a>
+						</div>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="syncStatusChart"></div>
+					<div class="mt-4">
+						<div class="d-flex justify-content-between mb-3">
+							<div class="d-flex align-items-center">
+								<div class="badge rounded bg-label-success me-2 p-1"><span class="d-block" style="width:8px;height:8px;"></span></div>
+								<span>Success</span>
+							</div>
+							<span class="fw-medium">{{ $syncStats['success'] ?? 0 }}</span>
+						</div>
+						<div class="d-flex justify-content-between mb-3">
+							<div class="d-flex align-items-center">
+								<div class="badge rounded bg-label-danger me-2 p-1"><span class="d-block" style="width:8px;height:8px;"></span></div>
+								<span>Error</span>
+							</div>
+							<span class="fw-medium">{{ $syncStats['error'] ?? 0 }}</span>
+						</div>
+						<div class="d-flex justify-content-between mb-3">
+							<div class="d-flex align-items-center">
+								<div class="badge rounded bg-label-warning me-2 p-1"><span class="d-block" style="width:8px;height:8px;"></span></div>
+								<span>Warning</span>
+							</div>
+							<span class="fw-medium">{{ $syncStats['warning'] ?? 0 }}</span>
+						</div>
+						<div class="d-flex justify-content-between">
+							<div class="d-flex align-items-center">
+								<div class="badge rounded bg-label-info me-2 p-1"><span class="d-block" style="width:8px;height:8px;"></span></div>
+								<span>Info</span>
+							</div>
+							<span class="fw-medium">{{ $syncStats['info'] ?? 0 }}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Top Customers by Revenue -->
-		<div class="col-xxl-6 col-lg-6">
+		<div class="col-xxl-4 col-lg-4">
 			<div class="card h-100">
 			<div class="card-header d-flex justify-content-between">
 				<div class="card-title mb-0">
@@ -221,7 +273,7 @@
 		</div>
 
 		<!-- Recent Customers -->
-		<div class="col-xxl-12">
+		<div class="col-xxl-7">
 			<div class="card">
 			<div class="card-header d-flex align-items-center justify-content-between">
 				<div class="card-title mb-0">
@@ -277,6 +329,57 @@
 			</div>
 			</div>
 		</div>
+
+		<!-- Recent Sync Activities -->
+		<div class="col-xxl-5 col-lg-5">
+			<div class="card h-100">
+				<div class="card-header d-flex align-items-center justify-content-between">
+					<div class="card-title mb-0">
+						<h5 class="m-0 me-2">Recent Sync Activities</h5>
+					</div>
+				</div>
+				<div class="card-body" style="max-height: 400px; overflow-y: auto;">
+					<ul class="timeline mb-0">
+						@forelse($recentSyncLogs ?? [] as $log)
+							<li class="timeline-item timeline-item-transparent">
+								<span class="timeline-point timeline-point-{{ 
+									$log->status === 'success' ? 'success' : 
+									($log->status === 'error' ? 'danger' : 
+									($log->status === 'warning' ? 'warning' : 'info')) 
+								}}"></span>
+								<div class="timeline-event">
+									<div class="timeline-header mb-1">
+										<h6 class="mb-0">
+											{{ $log->end_point ?? 'Sync Operation' }}
+											<span class="badge bg-label-{{ 
+												$log->status === 'success' ? 'success' : 
+												($log->status === 'error' ? 'danger' : 
+												($log->status === 'warning' ? 'warning' : 'info')) 
+											}} ms-2">{{ strtoupper($log->status) }}</span>
+										</h6>
+										<small class="text-body-secondary">{{ $log->created_at->diffForHumans() }}</small>
+									</div>
+									<p class="mb-1">
+										<span class="badge bg-label-secondary">{{ strtoupper($log->method ?? 'N/A') }}</span>
+										@if($log->http_code)
+											<span class="badge bg-label-{{ $log->http_code >= 200 && $log->http_code < 300 ? 'success' : 'danger' }}">
+												HTTP {{ $log->http_code }}
+											</span>
+										@endif
+									</p>
+									@if($log->error_message)
+										<p class="mb-0 text-danger small">{{ \Illuminate\Support\Str::limit($log->error_message, 100) }}</p>
+									@endif
+								</div>
+							</li>
+						@empty
+							<li class="text-center text-body-secondary py-4">No sync activities found</li>
+						@endforelse
+					</ul>
+				</div>
+			</div>
+		</div>
+
 	</div>
 @endsection
 @section('page-js')
@@ -287,7 +390,6 @@
 		(function() {
 			// Monthly Revenue Chart
 			const monthlyRevenueChartEl = document.querySelector('#monthlyRevenueChart');
-			
 			if (monthlyRevenueChartEl) {
 				const monthlyRevenueData = @json($monthlyRevenueData);
 				const monthLabels = @json($monthLabels);
@@ -453,6 +555,79 @@
 				
 				const estimatesStatusChart = new ApexCharts(estimatesStatusChartEl, estimatesStatusChartConfig);
 				estimatesStatusChart.render();
+			}
+
+			// Sync Status Chart
+			const syncStatusChartEl = document.querySelector('#syncStatusChart');
+			if (syncStatusChartEl) {
+				const syncStats = @json($syncStats ?? null) || { success: 0, error: 0, warning: 0, info: 0 };
+				const syncStatusChartConfig = {
+					chart: {
+						height: 200,
+						type: 'donut'
+					},
+					labels: ['Success', 'Error', 'Warning', 'Info'],
+					series: [
+						syncStats.success || 0,
+						syncStats.error || 0,
+						syncStats.warning || 0,
+						syncStats.info || 0
+					],
+					colors: ['#71dd37', '#ff3e1d', '#ffab00', '#03c3ec'],
+					stroke: {
+						width: 0
+					},
+					dataLabels: {
+						enabled: false
+					},
+					legend: {
+						show: false
+					},
+					grid: {
+						padding: {
+							top: 0,
+							bottom: 0,
+							right: 15
+						}
+					},
+					plotOptions: {
+						pie: {
+							donut: {
+								size: '70%',
+								labels: {
+									show: true,
+									value: {
+										fontSize: '1.5rem',
+										fontWeight: 600,
+										color: '#566a7f',
+										offsetY: -15,
+										formatter: function(val) {
+											return val;
+										}
+									},
+									name: {
+										offsetY: 20,
+										fontWeight: 600
+									},
+									total: {
+										show: true,
+										fontSize: '.7rem',
+										label: 'Total Syncs',
+										color: '#a1acb8',
+										formatter: function(w) {
+											return w.globals.seriesTotals.reduce((a, b) => {
+												return a + b;
+											}, 0);
+										}
+									}
+								}
+							}
+						}
+					}
+				};
+				
+				const syncStatusChart = new ApexCharts(syncStatusChartEl, syncStatusChartConfig);
+				syncStatusChart.render();
 			}
 		})();
 	</script>

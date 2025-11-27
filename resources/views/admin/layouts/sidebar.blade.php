@@ -44,7 +44,37 @@
                 <div data-i18n="Invoices">Invoices</div>
             </a>
         </li>
-        {{-- <li class="menu-item {{ request()->segment(1) == 'roles' || request()->segment(1) == 'users' ? 'active open' : '' }}">
+        <li class="menu-item {{ \Route::getFacadeRoot()->current()->uri() == '/system-logs' ? 'active' : '' }}">
+            <a href="{{ route('system-logs.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-history"></i>
+                <div data-i18n="System Logs">System Logs</div>
+            </a>
+        </li>
+        <li class="menu-item {{ \Route::getFacadeRoot()->current()->uri() == '/settings' ? 'active' : '' }}">
+            <a href="{{ route('settings.index') }}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-settings"></i>
+                <div data-i18n="Settings">Settings</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->segment(1) == 'eset-products' || request()->segment(1) == 'syncro-products' ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon icon-base ti tabler-package"></i>
+                <div data-i18n="Product Management">Product Management</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->segment(1) == 'eset-products' ? 'active' : '' }}">
+                    <a href="{{ route('eset-products.index') }}" class="menu-link">
+                        <div data-i18n="Eset Products">Eset Products</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('syncro-products.index') }}" class="menu-link">
+                        <div data-i18n="Syncro Products">Syncro Products</div>
+                    </a>
+                </li>
+            </ul>
+        </li> 
+        <li class="menu-item {{ request()->segment(1) == 'roles' || request()->segment(1) == 'users' ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon icon-base ti tabler-users"></i>
                 <div data-i18n="User Management">User Management</div>
@@ -56,12 +86,12 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="dashboards-crm.html" class="menu-link">
+                    <a href="{{ route('users.index') }}" class="menu-link">
                         <div data-i18n="Users">Users</div>
                     </a>
                 </li>
             </ul>
-        </li>  --}}
+        </li> 
     </ul>
 </aside>
 <div class="menu-mobile-toggler d-xl-none rounded-1">

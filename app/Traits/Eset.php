@@ -6,7 +6,7 @@ use App\Models\SystemLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-
+use App\Models\Setting;
 trait Eset {
 
     protected $baseUrl;
@@ -16,9 +16,10 @@ trait Eset {
     protected $accessToken;
 
     public function initializeEset() {
-        $this->baseUrl = env('ESET_BASE_URL', 'https://mspapi.eset.com/api');
-        $this->userName = env('ESET_USERNAME');
-        $this->password = env('ESET_PASSWORD');
+        $setting = Setting::first();
+        $this->baseUrl = $setting->eset_base_url;
+        $this->userName = $setting->eset_username;
+        $this->password = $setting->eset_password;
     }
 
     public function authenticate() {

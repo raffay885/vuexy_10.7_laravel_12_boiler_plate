@@ -4,16 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SyncroProduct;
-use App\Models\User;
-class Estimate extends Model
+
+class EsetProduct extends Model
 {
     protected $guarded = [];
-    protected $table = 'estimates';
-
-    public function customer()
-    {
-        return $this->belongsTo(User::class, 'customer_id', 'id');
-    }
+    protected $table = 'eset_products';
 
     public function syncroProduct()
     {

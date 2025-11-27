@@ -24,16 +24,28 @@
 							<div class="fw-semibold">{{ $customer->syncro_customer_id }}</div>
 						</div>
 						<div class="col-md-3 mb-3">
-							<div class="text-muted small mb-1">First Name</div>
-							<div class="fw-semibold">{{ $customer->first_name }}</div>
-						</div>
-						<div class="col-md-3 mb-3">
-							<div class="text-muted small mb-1">Last Name</div>
-							<div class="fw-semibold">{{ $customer->last_name }}</div>
+							<div class="text-muted small mb-1">Name</div>
+							<div class="fw-semibold">{{ $customer->first_name . ' ' . $customer->last_name }}</div>
 						</div>
 						<div class="col-md-3 mb-3">
 							<div class="text-muted small mb-1">Email</div>
 							<div class="fw-semibold">{{ $customer->email }}</div>
+						</div>
+						<div class="col-md-3 mb-3">
+							<div class="text-muted small mb-1">Total Assets</div>
+							<div class="fw-semibold">
+								<span class="badge bg-label-secondary">
+									{{ $customerTotalAssets }}
+								</span>
+							</div>
+						</div>
+						<div class="col-md-3 mb-3">
+							<div class="text-muted small mb-1">Billing Cycle</div>
+							<div class="fw-semibold">
+								<span class="badge bg-label-info">
+									{{ $customer->billing_type == 'annual' ? 'Annual' : 'Monthly' }}
+								</span>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -328,7 +340,7 @@
 									<tr>
 										<th>Sr #</th>
 										<th>Syncro ID</th>
-										<th>Product ID</th>
+										<th>Product</th>
 										<th>Number</th>
 										<th>Quantity</th>
 										<th>Subtotal</th>
@@ -345,7 +357,9 @@
 										<tr>
 											<td>{{ $key + 1 }}</td>
 											<td>{{ $customerEstimate->syncro_estimate_id }}</td>
-											<td>{{ $customerEstimate->syncro_product_id }}</td>
+											<td>
+												{{ $customerEstimate->syncroProduct->syncro_product_id }} - {{ $customerEstimate->syncroProduct->syncro_product_title }}
+											</td>
 											<td>{{ $customerEstimate->syncro_estimate_number }}</td>
 											<td>{{ $customerEstimate->quantity }}</td>
 											<td>$ {{ number_format($customerEstimate->estimate_subtotal, 2) }}</td>
@@ -539,10 +553,10 @@
 							<div class="col-md-12 mb-3">
 								<label for="syncro_product_id" class="form-label">Products<b class="text-danger">*</b></label>
 								<select name="syncro_product_id" id="syncro_product_id" class="select2 form-select" data-placeholder="Select Product" required>
-									@if(isset($products) && isset($products['products']) && !empty($products['products']))
+									@if(isset($syncroProducts) && !empty($syncroProducts))
 										<option value="">Select Product</option>
-										@foreach($products['products'] as $product)
-											<option value="{{ $product['id'] }}">{{ $product['name'] }}</option>
+										@foreach($syncroProducts as $syncroProduct)
+											<option value="{{ $syncroProduct->id }}">{{ $syncroProduct->syncro_product_id }} - {{ $syncroProduct->syncro_product_title }}</option>
 										@endforeach
 									@else
 										<option value="">No products found</option>
@@ -551,7 +565,7 @@
 							</div>
 								<div class="col-md-12 mb-3">
 								<label for="quantity" class="form-label">Quantity<b class="text-danger">*</b></label>
-								<input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+								<input type="number" class="form-control" id="quantity" name="quantity" value="{{ $customerTotalAssets }}" min="1" required>
 							</div>
 							<input type="hidden" name="customer_id" value="{{ $customer->id }}">
 							<div class="col-md-12 mb-4">
@@ -576,6 +590,7 @@
         $(document).ready(function() {
             $('.table').DataTable({
 				dom: '<"card-header flex-column flex-md-row border-bottom"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row mx-2"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row mx-2"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+				lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
 				buttons: [
 					{
 						extend: 'collection',
@@ -630,7 +645,7 @@
 					}
 				],
 				language: {
-					searchPlaceholder: 'Search Assets...'
+					searchPlaceholder: 'Search ...'
 				}
 			});
         });

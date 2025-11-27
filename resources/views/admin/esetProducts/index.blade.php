@@ -1,0 +1,166 @@
+@extends('admin.layouts.master')
+@section('title', 'Eset Products')
+@section('content')
+    <section>
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table class="table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th class="not_include"></th>
+                            <th>Sr #</th>
+                            <th>Syncro Product</th>
+                            <th>Eset Product Code</th>
+                            <th>Eset Product Name</th>
+                            <th class="not_include">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+		<!-- Add Modal -->
+        <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modelHeading">Add Eset Product</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form data-href="{{ route('eset-products.store') }}" class="ajax-form in_page_ajax_form">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="row g-2">
+								<div class="col-md-12">
+									<label class="form-label" for="eset_product_id">Syncro Product<b class="text-danger">*</b></label>
+									<select name="syncro_product_id" id="syncro_product_id" class="form-select select2" data-placeholder="Select Syncro Product" required>
+										<option value="">Select Syncro Product</option>
+										@foreach($syncroProducts as $syncroProduct)
+											<option value="{{ $syncroProduct->id }}">{{ $syncroProduct->syncro_product_id }} - {{ $syncroProduct->syncro_product_title }}</option>
+										@endforeach
+									</select>
+								</div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="eset_product_code">Eset Product Code<b class="text-danger">*</b></label>
+                                    <input type="text" id="eset_product_code" name="eset_product_code" class="form-control" placeholder="Enter eset product code" required />
+                                </div>
+								<div class="col-md-12">
+									<label class="form-label" for="eset_product_name">Eset Product Name<b class="text-danger">*</b></label>
+									<input type="text" id="eset_product_name" name="eset_product_name" class="form-control" placeholder="Enter eset product name" required />
+								</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary save-btn">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+		{{-- Update Modal --}}
+		<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modelHeading">Update Eset Product</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form class="ajax-form in_page_ajax_form" id="updateForm">
+                        @csrf
+						@method('PUT')
+                        <div class="modal-body">
+                            <div class="row g-2">
+								<div class="col-md-12">
+									<label class="form-label" for="syncro_product_id">Syncro Product<b class="text-danger">*</b></label>
+									<select name="syncro_product_id" id="edit_syncro_product_id" class="form-select select2" data-placeholder="Select Syncro Product" required>
+										<option value="">Select Syncro Product</option>
+										@foreach($syncroProducts as $syncroProduct)
+											<option value="{{ $syncroProduct->id }}">{{ $syncroProduct->syncro_product_id }} - {{ $syncroProduct->syncro_product_title }}</option>
+										@endforeach
+									</select>
+								</div>
+								<div class="col-md-12">
+									<label class="form-label" for="eset_product_code">Eset Product Code<b class="text-danger">*</b></label>
+									<input type="text" id="edit_eset_product_code" name="eset_product_code" class="form-control" placeholder="Enter eset product code" required />
+								</div>
+                                <div class="col-md-12">
+                                    <label class="form-label" for="eset_product_name">Eset Product Name<b class="text-danger">*</b></label>
+                                    <input type="text" id="edit_eset_product_name" name="eset_product_name" class="form-control" placeholder="Enter eset product name" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary save-btn">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection
+@section('page-js')
+    <script>
+        $(document).ready(function() {
+            const esetProductsTable = new GenericDataTable({
+                tableId: '#dataTable',
+                ajaxUrl: "{{ route('eset-products.index') }}",
+                title: 'Eset Products',
+                createModal: "#addModal",
+                columns: [
+                    { data: 'id' },
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    {
+						data: 'syncroProduct',
+						name: 'syncroProduct',
+						render: function(data, type, full, meta) {
+							return `${full.syncro_product.syncro_product_id} - ${full.syncro_product.syncro_product_title}`;
+						}
+					},
+                    { data: 'eset_product_code' },
+                    { data: 'eset_product_name' },
+                    { data: 'action' }
+                ],
+                actionRenderer: function(data, type, full, meta) {
+                    let updateUrl = "{{ route('eset-products.update', ':id') }}".replace(':id', full.id);
+                    let deleteUrl = "{{ route('eset-products.destroy', ':id') }}".replace(':id', full.id);
+                    
+                    let btn = `
+                        <li><a href="javascript:;" class="dropdown-item edit-record" data-href="${updateUrl}" data-syncro-product-id="${full.syncro_product_id}" data-eset-product-code="${full.eset_product_code}" data-eset-product-name="${full.eset_product_name}" data-bs-target="#updateModal" data-bs-toggle="modal">Edit</a></li>
+                        <li><a href="javascript:;" class="dropdown-item text-danger deleteRecord" data-href="${deleteUrl}">Delete</a></li>
+                    `;
+                    
+                    return `
+                        <div class="d-inline-block">
+                            <a href="javascript:;" class="btn btn-icon btn-text-secondary rounded-pill waves-effect dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="icon-base ti tabler-dots-vertical"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end m-0">
+                                ${btn}
+                            </ul>
+                        </div>
+                    `;
+                },
+                searchPlaceholder: 'Search eset products...',
+            });
+        });
+
+		$(document).on('click' , '.edit-record' , function (){
+			$('#edit_syncro_product_id').val($(this).attr('data-syncro-product-id'));
+			$('#edit_eset_product_code').val($(this).attr('data-eset-product-code'));
+			$('#edit_eset_product_name').val($(this).attr('data-eset-product-name'));
+
+			$('#updateForm').attr('data-href', $(this).attr('data-href'));
+			$('#updateModal').modal('show');
+		});
+
+		$(document).on('shown.bs.modal', function (event) {
+			const modal = $(event.target);
+			modal.find('.select2').select2({
+				dropdownParent: modal
+			});
+		});
+    </script>
+@endsection

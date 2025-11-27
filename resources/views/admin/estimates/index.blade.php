@@ -40,25 +40,18 @@
 					<div class="modal-body">
 						<div class="row">
 							<div class="col-md-12 mb-3">
-								<label for="syncro_product_id" class="form-label">Products<b class="text-danger">*</b></label>
-								<select name="syncro_product_id" id="syncro_product_id" class="select2 form-select" data-placeholder="Select Product" required>
-									@if(isset($products) && isset($products['products']) && !empty($products['products']))
-										<option value="">Select Product</option>
-										@foreach($products['products'] as $product)
-											<option value="{{ $product['id'] }}">{{ $product['name'] }}</option>
-										@endforeach
-									@else
-										<option value="">No products found</option>
-									@endif
-								</select>
-							</div>
-							<div class="col-md-12 mb-3">
 								<label for="customer_id" class="form-label">Customer<b class="text-danger">*</b></label>
 								<select name="customer_id" id="customer_id" class="select2 form-select" data-placeholder="Select Customer" required>
 									<option value="">Select Customer</option>
 									@foreach($customers as $customer)
-										<option value="{{ $customer->id }}">{{ $customer->first_name . ' ' . $customer->last_name }}</option>
+										<option value="{{ $customer->id }}" data-billing-type="{{ $customer->billing_type }}">{{ $customer->first_name . ' ' . $customer->last_name }}</option>
 									@endforeach
+								</select>
+							</div>
+							<div class="col-md-12 mb-3">
+								<label for="syncro_product_id" class="form-label">Products<b class="text-danger">*</b></label>
+								<select name="syncro_product_id" id="syncro_product_id" class="select2 form-select" data-placeholder="Select Product" required>
+									<option value="">Select Product</option>
 								</select>
 							</div>
 							<div class="col-md-12 mb-3">
@@ -109,7 +102,7 @@
 							`;
 						}
 					},
-                    { data: 'number' },
+                    { data: 'syncro_estimate_number' },
                     { data: 'syncro_estimate_id' },
                     { data: 'syncro_product_id' },
                     { 
@@ -174,6 +167,22 @@
                 searchPlaceholder: 'Search estimates...',
             });
         });
+
+		$(document).on('change', '#customer_id', function() {
+			const customerId = $(this).val();
+			const billingType = $(this).find('option:selected').data('billing-type');
+			$.ajax({
+				url: "{{ route('syncro-products.getProducts', ':billingType') }}".replace(':billingType', billingType),
+				type: 'GET',
+				success: function(response) {
+					$('#syncro_product_id').empty();
+					$('#syncro_product_id').append('<option value="">Select Product</option>');
+					response.forEach(product => {
+						$('#syncro_product_id').append('<option value="' + product.id + '">' + product.syncro_product_id + ' - ' + product.syncro_product_title + '</option>');
+					});
+				}
+			});
+		});
 
 		$(document).on('shown.bs.modal', function (event) {
 			const modal = $(event.target);

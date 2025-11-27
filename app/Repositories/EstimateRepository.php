@@ -6,6 +6,7 @@ use App\Interfaces\EstimateRepositoryInterface;
 use App\Models\Estimate;
 use App\Traits\Syncro;
 use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\SyncroProductRepositoryInterface;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -14,9 +15,14 @@ class EstimateRepository implements EstimateRepositoryInterface{
 
 	use Syncro;
 	protected $userRepository;
+	protected $syncroProductRepository;
 
-	public function __construct(UserRepositoryInterface $userRepository){
+	public function __construct(
+		UserRepositoryInterface $userRepository,
+		SyncroProductRepositoryInterface $syncroProductRepository
+	){
 		$this->userRepository = $userRepository;
+		$this->syncroProductRepository = $syncroProductRepository;
 	}
 
 	public function getDataTable(array $filters = []){
@@ -24,7 +30,7 @@ class EstimateRepository implements EstimateRepositoryInterface{
 	}
 
 	public function find(array $filters = []){
-		return Estimate::with('customer')->where([ ...$filters ])->orderBy('id', 'desc')->get();
+		return Estimate::with(['customer', 'syncroProduct'])->where([ ...$filters ])->orderBy('id', 'desc')->get();
 	}
 
 	public function findOne(array $filters = []){
@@ -37,14 +43,18 @@ class EstimateRepository implements EstimateRepositoryInterface{
 
 	public function create(array $data){
 		try{
+			$is_annual = 1;
 			$customer = $this->userRepository->findOne(['id' => $data['customer_id']]);
 			if(!$customer){
 				return ['status' => false, 'message' => 'Customer not found', 'statusCode' => 404];
 			}
+
+			$syncroProduct = $this->syncroProductRepository->findOne(['id' => $data['syncro_product_id']]);
+			if(!$syncroProduct){
+				return ['status' => false, 'message' => 'Product not found', 'statusCode' => 404];
+			}
 			
-			$syncroProductResponse = $this->syncroGet('products/' . $data['syncro_product_id']);
-			Log::info('Get Product Syncro Response: ' . json_encode($syncroProductResponse));
-			
+			$syncroProductResponse = $this->syncroGet('products/' . $syncroProduct->syncro_product_id);
 			if(!$syncroProductResponse || !isset($syncroProductResponse['product'])){
 				return ['status' => false, 'message' => 'Product not found', 'statusCode' => 404];
 			}
@@ -52,21 +62,33 @@ class EstimateRepository implements EstimateRepositoryInterface{
 			$productPrice = $syncroProductResponse['product']['price_retail'];
 			$assetAmountPerMonth = $productPrice * $data['quantity'];
 			$invoiceTotal = $assetAmountPerMonth * 12;
-
-			if(!isset($data['is_annual'])){
-				$annualEstimate = $this->findOne(['customer_id' => $data['customer_id'], 'status' => 'Approved', 'is_annual' => 1]);
-				if($annualEstimate){
-					$approvalDate = Carbon::parse($annualEstimate->approved_at)->startOfMonth();
-					$currentDate = now()->startOfMonth();
-					$monthsPassed = $approvalDate->diffInMonths($currentDate);
-					$remainingMonths = max(0, 12 - $monthsPassed);
-
-					$invoiceTotal = $assetAmountPerMonth * $remainingMonths;
+			
+			// Monthly customer will not be prorated
+			if($customer->billing_type == 'annual'){
+				if(!isset($data['is_annual'])){
+					$annualEstimate = $this->findOne(['customer_id' => $data['customer_id'], 'status' => 'Approved', 'is_annual' => 1]);
+					if($annualEstimate){
+						$approvalDate = Carbon::parse($annualEstimate->approved_at)->startOfMonth();
+						$currentDate = now()->startOfMonth();
+						$monthsPassed = $approvalDate->diffInMonths($currentDate);
+						$remainingMonths = max(0, 12 - $monthsPassed);
+	
+						$invoiceTotal = $assetAmountPerMonth * $remainingMonths;
+						$is_annual = 0;
+					}
+				}else{
+					$this->findOne(['customer_id' => $data['customer_id'], 'status' => 'Approved', 'is_annual' => 1])->update(['is_annual' => 0]);
 				}
 			}else{
-				$this->findOne(['customer_id' => $data['customer_id'], 'status' => 'Approved', 'is_annual' => 1])->update(['is_annual' => 0]);
+				$invoiceTotal = $assetAmountPerMonth;
+				$annualEstimate = $this->findOne(['customer_id' => $data['customer_id'], 'status' => 'Approved', 'is_annual' => 1]);
+				if($annualEstimate){
+					$annualEstimate->update(['is_annual' => 0]);
+				}
+
+				$is_annual = 1;
 			}
-			
+
 			$syncroResponse = $this->syncroPost('estimates', [
 				'date' => now()->format('Y-m-d'),
 				'customer_id' => $customer->syncro_customer_id,
@@ -90,7 +112,6 @@ class EstimateRepository implements EstimateRepositoryInterface{
 			// 	'id' => 'EST-' . rand(10000000, 99999999),
 			// ];
 
-			Log::info('Create Estimate Syncro Response: ' . json_encode($syncroResponse));
 			if($syncroResponse && isset($syncroResponse['estimate'])){
 				Estimate::create([
 					'customer_id' => $data['customer_id'],
@@ -103,7 +124,7 @@ class EstimateRepository implements EstimateRepositoryInterface{
 					'syncro_estimate_tax' => $syncroResponse['estimate']['tax'],
 					'status' => $syncroResponse['estimate']['status'],
 					'note' => $data['note'],
-					'is_annual' => isset($annualEstimate) ? 0 : 1,
+					'is_annual' => $is_annual,
 					'invoice_total' => $invoiceTotal,
 				]);
 

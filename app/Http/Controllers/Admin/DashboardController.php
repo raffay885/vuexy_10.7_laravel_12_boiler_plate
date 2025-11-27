@@ -10,10 +10,13 @@ use App\Interfaces\CustomerAssetRepositoryInterface;
 use App\Models\Invoice;
 use App\Models\Estimate;
 use App\Models\User;
+use App\Models\SystemLog;
 use Illuminate\Support\Facades\DB;
-
+use App\Traits\Eset;
 class DashboardController extends Controller
 {
+    use Eset;
+
     protected $view = 'admin.dashboard';
     protected $userRepository;
     protected $estimateRepository;
@@ -75,10 +78,33 @@ class DashboardController extends Controller
             'Approved' => $this->estimateRepository->count(['status' => 'Approved']),
             'Declined' => $this->estimateRepository->count(['status' => 'Declined']),
             'Draft' => $this->estimateRepository->count(['status' => 'Draft'])
+        ];   
+
+        // Sync Status and Error Monitoring 
+        $syncStats = [
+            'success' => SystemLog::where('source', 'syncro')->where('status', 'success')->count(),
+            'error' => SystemLog::where('source', 'syncro')->where('status', 'error')->count(),
+            'warning' => SystemLog::where('source', 'syncro')->where('status', 'warning')->count(),
+            'info' => SystemLog::where('source', 'syncro')->where('status', 'info')->count(),
+            'total' => SystemLog::where('source', 'syncro')->count()
         ];
 
         // Recent Customers
-        $recentCustomers = $this->userRepository->find(['user_type' => 'customer'], 5);    
+        $recentCustomers = $this->userRepository->find(['user_type' => 'customer'], 5); 
+
+        // Recent Sync Logs
+        $recentSyncLogs = SystemLog::where('source', 'syncro')->orderBy('created_at', 'desc')->limit(10)->get();
+
+        // License Usage
+        $totalLicense = 0;
+        $esetLicenseResponse = $this->esetPost('Search/Licenses', []);
+        if($esetLicenseResponse && isset($esetLicenseResponse['Paging'])){
+            $totalLicense = $esetLicenseResponse['Paging']['TotalCount'];
+        }
+
+        $usedLicense = Invoice::join('estimates', 'invoice.estimate_id', '=', 'estimates.id')->whereNotNull('invoice.eset_license_key')->sum('estimates.quantity');
+        $availableLicense = $totalLicense - $usedLicense;
+
         return view($this->view, get_defined_vars());
     }
 }

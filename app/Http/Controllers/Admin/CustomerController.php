@@ -9,6 +9,7 @@ use App\Interfaces\EstimateRepositoryInterface;
 use App\Interfaces\InvoiceRepositoryInterface;
 use App\Traits\Syncro;
 use Illuminate\Support\Facades\Log;
+use App\Interfaces\SyncroProductRepositoryInterface;
 class CustomerController extends Controller
 {
     use Syncro;
@@ -17,15 +18,18 @@ class CustomerController extends Controller
     protected $userRepository;
     protected $estimateRepository;
     protected $invoiceRepository;
+    protected $syncroProductRepository;
 
     public function __construct(
         UserRepositoryInterface $userRepository,
         EstimateRepositoryInterface $estimateRepository,
-        InvoiceRepositoryInterface $invoiceRepository
+        InvoiceRepositoryInterface $invoiceRepository,
+        SyncroProductRepositoryInterface $syncroProductRepository
     ){
         $this->userRepository = $userRepository;
         $this->estimateRepository = $estimateRepository;
         $this->invoiceRepository = $invoiceRepository;
+        $this->syncroProductRepository = $syncroProductRepository;
     }
 
     public function index()
@@ -112,6 +116,12 @@ class CustomerController extends Controller
             abort(404);
         }
 
+        $customerTotalAssets = 0;
+        $customerSyncroAssets = $this->syncroGet('customer_assets', ['customer_id' => $customer->syncro_customer_id]);
+        if($customerSyncroAssets && isset($customerSyncroAssets['assets']) && !empty($customerSyncroAssets['assets'])){
+            $customerTotalAssets = $customerSyncroAssets['meta']['total_entries'];
+        }
+
         switch(request()->query('tab')) {
             case 'syncroDetails':
                 $customerDetails = [];
@@ -123,7 +133,6 @@ class CustomerController extends Controller
                 break;
             case 'customerAssets':
                 $customerAssets = [];
-                $customerSyncroAssets = $this->syncroGet('customer_assets', ['customer_id' => $customer->syncro_customer_id]);
                 if($customerSyncroAssets && isset($customerSyncroAssets['assets']) && !empty($customerSyncroAssets['assets'])){
                     $customerAssets = $customerSyncroAssets['assets'];
                 }
@@ -131,7 +140,7 @@ class CustomerController extends Controller
                 break;
 
             case 'customerEstimates':
-                $products = $this->syncroGet('products');
+                $syncroProducts = $this->syncroProductRepository->find(['billing_type' => $customer->billing_type]);
                 $customerEstimates = $this->estimateRepository->find(['customer_id' => $customer->id]);   
                 break;
                 

@@ -6,6 +6,7 @@ use App\Models\SystemLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Setting;
 
 trait Syncro{
 
@@ -15,9 +16,10 @@ trait Syncro{
 	protected $domain;
 
 	public function initializeSyncro(){
-		$this->subDomain = env('SYNCRO_SUBDOMAIN');
-		$this->domain = env('SYNCRO_DOMAIN');
-		$this->apiKey = env('SYNCRO_API_KEY');
+		$setting = Setting::first();
+		$this->subDomain = $setting->syncro_subdomain;
+		$this->domain = $setting->syncro_domain;
+		$this->apiKey = $setting->syncro_api_key;
 		$this->baseUrl = "https://{$this->subDomain}.{$this->domain}/api/v1";
 	}
 

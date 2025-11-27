@@ -26,12 +26,15 @@ class GenericDataTable {
 
             // DataTable settings
             order: [[1, 'asc']],
-            pageLength: [10, 25, 50, 100],
+            pageLength: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
             searchPlaceholder: '',
 
             // Custom renderers
             actionRenderer: null,
             exportFormatter: null,
+
+            // AJAX settings
+            ajaxData: null,
 
             // Responsive settings
             responsiveModal: true,
@@ -301,8 +304,18 @@ class GenericDataTable {
     createTable() {
         const tableTitle = this.createTableTitle();
 
+        // Build AJAX configuration
+        const ajaxConfig = {
+            url: this.options.ajaxUrl
+        };
+
+        // Add data function if provided
+        if (this.options.ajaxData) {
+            ajaxConfig.data = this.options.ajaxData;
+        }
+
         const config = {
-            ajax: this.options.ajaxUrl,
+            ajax: ajaxConfig,
             columns: this.options.columns,
             columnDefs: this.getColumnDefs(),
             select: {

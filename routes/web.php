@@ -10,6 +10,10 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Webhook\WebhookController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\SyncroProductController;
+use App\Http\Controllers\Admin\EsetProductController;
+use App\Http\Controllers\Admin\SystemLogController;
+use App\Http\Controllers\Admin\SettingController;
 
 Route::middleware('auth')->group(function () {
     // Dashboard
@@ -29,6 +33,19 @@ Route::middleware('auth')->group(function () {
     // Invoices
     Route::resource('invoices', InvoiceController::class);
 
+    // Syncro Products
+    Route::resource('syncro-products', SyncroProductController::class);
+    Route::get('syncro-products/getProducts/{billingType}', [SyncroProductController::class, 'getProducts'])->name('syncro-products.getProducts');
+
+    // Eset Products
+    Route::resource('eset-products', EsetProductController::class);
+
+    // System Logs
+    Route::resource('system-logs', SystemLogController::class);
+
+    // Settings
+    Route::resource('settings', SettingController::class);
+
     // Role
     Route::resource('roles', RoleController::class);
 
@@ -44,5 +61,6 @@ Route::middleware('auth')->group(function () {
 
 // Webhooks
 Route::post('webhook/approveEstimate', [WebhookController::class, 'approveEstimate']);
+Route::post('webhook/addAsset', [WebhookController::class, 'addAsset']);
 
 require __DIR__.'/auth.php';
